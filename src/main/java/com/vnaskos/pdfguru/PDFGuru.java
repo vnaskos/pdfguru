@@ -1,34 +1,14 @@
 package com.vnaskos.pdfguru;
 
+import com.vnaskos.pdfguru.execute.ProcessHandler;
 import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
-import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
+import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
-import org.apache.pdfbox.exceptions.COSVisitorException;
-import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
-import org.apache.pdfbox.util.PDFMergerUtility;
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
 
 /**
  *
@@ -257,13 +237,18 @@ public class PDFGuru extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                tryToRun();
-            }
-        }).start();
+        List<String> files = new ArrayList<String>();
+        boolean useTemp = jCheckBox1.isSelected();
+        float compression = Float.parseFloat(jSpinner1.getValue().toString());
+        String output = jTextField1.getText();
+        
+        for(int i=0; i<model.getSize(); i++) {
+            String file = model.get(i).toString();
+            files.add(file);
+        }
+        
+        ProcessHandler handler = new ProcessHandler(files, useTemp, compression, output);
+        handler.execute();
     }//GEN-LAST:event_jButton7ActionPerformed
 
     /**
@@ -383,122 +368,5 @@ public class PDFGuru extends javax.swing.JFrame {
             path += path.toLowerCase().endsWith(".pdf") ? "" : ".pdf";
             jTextField1.setText(path);
         }
-    }
-    
-    private void tryToRun() {
-        try {
-            okButtonListener();
-        } catch (IOException ex) {
-            Logger.getLogger(PDFGuru.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (COSVisitorException ex) {
-            Logger.getLogger(PDFGuru.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    private void okButtonListener() throws IOException, COSVisitorException {
-        PDFMergerUtility ut = new PDFMergerUtility();
-        OutputDialog progress = new OutputDialog();
-        progress.setVisible(true);
-        progress.setProgressMax(model.getSize());
-        
-        for(int i=0; i<model.getSize(); i++) {
-            if(!progress.isVisible()) {
-                return;
-            }
-            String file = model.get(i).toString();
-            progress.updateLog(file);
-
-            if(file.toLowerCase().endsWith(".pdf")) {        
-                if(!isFileEncrypted(file)) {
-                    ut.addSource(file);
-                } else {
-                    progress.updateLog("Skip! " + file + " is encrypted");
-                }
-            } else {
-                byte[] bytes = getImageAsByteArray(file);
-                if(jCheckBox1.isSelected()) {
-                    File tmp = File.createTempFile("guru", ".tmp");
-                    tmp.deleteOnExit();
-                    FileOutputStream fout = new FileOutputStream(tmp);
-                    fout.write(bytes);
-                    ut.addSource(tmp);
-                } else {
-                    ut.addSource(new ByteArrayInputStream(bytes));
-                }
-            }
-            
-            progress.updateProgress(i+1);
-        }
-        
-        ut.setDestinationFileName(jTextField1.getText());
-        ut.mergeDocuments();
-        
-        progress.updateLog("Completed!");
-    
-        System.gc();
-    }
-    
-    byte[] getImageAsByteArray(String file) throws IOException, COSVisitorException {
-        PDDocument doc = new PDDocument();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        
-        BufferedImage bufferedImage = loadImage(file);
-        
-        PDPage page = new PDPage(new PDRectangle(bufferedImage.getWidth(), bufferedImage.getHeight()));
-        doc.addPage(page);
-
-        float compression = Float.parseFloat(jSpinner1.getValue().toString());
-        PDXObjectImage ximage = new PDJpeg(doc, bufferedImage, compression);
-
-        PDPageContentStream content = new PDPageContentStream(doc, page);
-
-        content.drawImage(ximage, 0, 0);
-        content.close();
-        
-        doc.save(baos);
-        doc.close();
-        
-        return baos.toByteArray();
-    }
-    
-    private BufferedImage loadImage(String file) throws IOException {
-        BufferedImage bufferedImage = null;
-        
-        try {
-            bufferedImage = Sanselan.getBufferedImage(new File(file));
-        } catch (ImageReadException ex) {
-            bufferedImage = ImageIO.read(new File(file));
-        }
-        
-        return bufferedImage;
-    }
-
-    private boolean isFileEncrypted(String file) {
-        try {
-            return isEncrypted(file);
-        } catch (IOException ex) {
-            Logger.getLogger(PDFGuru.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        return true;
-    }
-    
-    private boolean isEncrypted(String file) throws IOException {
-        File originalPDF = new File(file);
-        FileInputStream fis = new FileInputStream(originalPDF);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        PDFParser parser = new PDFParser(bis);
-        parser.parse();
-
-        PDDocument originialPdfDoc = parser.getPDDocument();
-
-        boolean isOriginalDocEncrypted = originialPdfDoc.isEncrypted();
-        originialPdfDoc.close();
-        parser.clearResources();
-//        if (isOriginalDocEncrypted) {
-//            originialPdfDoc.openProtection(new StandardDecryptionMaterial("password"));
-//        }
-
-        return isOriginalDocEncrypted;
     }
 }
