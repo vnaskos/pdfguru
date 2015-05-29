@@ -44,9 +44,9 @@ public class ProcessHandler {
         this.outputFile = outputFile;
     }
 
-    private void tryToRun() {
+    private void tryToStartProcess() {
         try {
-            okButtonListener();
+            startProcess();
         } catch (IOException ex) {
             Logger.getLogger(ProcessHandler.class.getName()).log(Level.SEVERE, null, ex);
         } catch (COSVisitorException ex) {
@@ -54,7 +54,7 @@ public class ProcessHandler {
         }
     }
     
-    private void okButtonListener() throws IOException, COSVisitorException {
+    private void startProcess() throws IOException, COSVisitorException {
         PDFMergerUtility ut = new PDFMergerUtility();
         OutputDialog progress = new OutputDialog();
         progress.setVisible(true);
@@ -134,7 +134,7 @@ public class ProcessHandler {
 
             @Override
             public void run() {
-                tryToRun();
+                tryToStartProcess();
             }
         };
 
