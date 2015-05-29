@@ -1,5 +1,7 @@
 package com.vnaskos.pdfguru;
 
+import javax.swing.SwingUtilities;
+
 /**
  *
  * @author Vasilis Naskos
@@ -87,8 +89,15 @@ public class OutputDialog extends javax.swing.JFrame {
     private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 
-    public void updateLog(String message) {
-        jTextArea1.setText(message+"\n"+jTextArea1.getText());
+    public void updateLog(final String message) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                jTextArea1.setText(message + "\n" + jTextArea1.getText());
+            }
+        
+        });
     }
     
     public void updateProgress(int value) {
