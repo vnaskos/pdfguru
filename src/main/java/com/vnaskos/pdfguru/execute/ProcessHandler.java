@@ -2,13 +2,11 @@ package com.vnaskos.pdfguru.execute;
 
 import com.vnaskos.pdfguru.OutputDialog;
 import com.vnaskos.pdfguru.PDFGuru;
+import com.vnaskos.pdfguru.input.items.InputItem;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -17,12 +15,12 @@ import javax.imageio.ImageIO;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
-import org.apache.pdfbox.util.PDFMergerUtility;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 
@@ -32,16 +30,16 @@ import org.apache.sanselan.Sanselan;
  */
 public class ProcessHandler {
     
-    private final List<String> files;
-    private final boolean useTemp;
+    private final List<InputItem> files;
+    private final boolean separateFiles;
     private final float compression;
     private final String outputFile;
 
-    public ProcessHandler(List<String> files, boolean useTemp, float compression, String outputFile) {
+    public ProcessHandler(List<InputItem> files, OutputParameters params) {
         this.files = files;
-        this.useTemp = useTemp;
-        this.compression = compression;
-        this.outputFile = outputFile;
+        this.compression = params.getCompression();
+        this.outputFile = params.getOutputFile();
+        this.separateFiles = params.isSeparateFiles();
     }
 
     private void tryToStartProcess() {
@@ -55,44 +53,123 @@ public class ProcessHandler {
     }
     
     private void startProcess() throws IOException, COSVisitorException {
-        PDFMergerUtility ut = new PDFMergerUtility();
         OutputDialog progress = new OutputDialog();
         progress.setVisible(true);
         progress.setProgressMax(files.size());
-
-        for (int i = 0; i < files.size(); i++) {
+        
+        PDDocument newDoc = new PDDocument();
+        PDDocument originialPdfDoc = null;
+        
+        int o = 1;
+        
+        for (int i=0; i<files.size(); i++) {
+            InputItem file = files.get(i);
+            
             if (!progress.isVisible()) {
                 return;
             }
-            String file = files.get(i);
-            progress.updateLog(file);
-
-            if (file.toLowerCase().endsWith(".pdf")) {
-                if (!isFileEncrypted(file)) {
-                    ut.addSource(file);
-                } else {
+            progress.updateLog(file.getPath());
+            if (isPDF(file)) {
+                if (isFileEncrypted(file.getPath())) {
                     progress.updateLog("Skip! " + file + " is encrypted");
+                    continue;
                 }
-            } else {
-                byte[] bytes = getImageAsByteArray(file);
-                if (useTemp) {
-                    File tmp = File.createTempFile("guru", ".tmp");
-                    tmp.deleteOnExit();
-                    FileOutputStream fout = new FileOutputStream(tmp);
-                    fout.write(bytes);
-                    ut.addSource(tmp);
+                FileInputStream fis = new FileInputStream(file.getPath());
+                PDFParser parser = new PDFParser(fis);
+                parser.parse();
+                originialPdfDoc = parser.getPDDocument();
+                PDDocumentCatalog cat = originialPdfDoc.getDocumentCatalog();
+                List<PDPage> pages = cat.getAllPages();
+                String pagesField = file.getPages();
+                if(pagesField.isEmpty()) {
+                    for(PDPage p : pages) {
+                        newDoc.importPage(p);
+                    }
+                    if (separateFiles) {
+                        newDoc.save(getOutputName(outputFile, o++));
+                        newDoc = new PDDocument();
+                    }
                 } else {
-                    ut.addSource(new ByteArrayInputStream(bytes));
+                    pagesField = pagesField.replaceAll("\\$", pages.size()+"");
+                    String[] groups = pagesField.split("\\|");
+                    for(String g : groups) {
+                        String[] subGroups = g.split(",");
+                        for(String sub : subGroups) {
+                            if(sub.contains("-")) {
+                                String[] lim = sub.split("-");
+                                int lim0 = Integer.parseInt(lim[0]);
+                                int lim1 = Integer.parseInt(lim[1]);
+                                if(lim0 < lim1) {
+                                    for(int j=lim0; j<=lim1; j++ ) {
+                                        newDoc.importPage(pages.get(j-1));
+                                    }
+                                } else {
+                                    for(int j=lim0; j>=lim1; j--) {
+                                        newDoc.importPage(pages.get(j-1));
+                                    }
+                                }
+                            } else {
+                                int p = Integer.parseInt(sub);
+                                newDoc.importPage(pages.get(p-1));
+                            }
+                            if(separateFiles) {
+                                newDoc.save(getOutputName(outputFile, o++));
+                                newDoc = new PDDocument();
+                            }
+                        }
+                    }
+                }
+                fis.close();
+            } else {
+                BufferedImage bufferedImage = loadImage(file.getPath());
+                if(bufferedImage != null) {
+                    PDPage page = new PDPage(new PDRectangle(bufferedImage.getWidth(), bufferedImage.getHeight()));
+                    newDoc.addPage(page);
+                    PDXObjectImage ximage = new PDJpeg(newDoc, bufferedImage, compression);
+                    PDPageContentStream content = new PDPageContentStream(newDoc, page);
+                    content.drawImage(ximage, 0, 0);
+                    content.close();
+                }
+                
+                if(separateFiles) {
+                    newDoc.save(getOutputName(outputFile, o++));
+                    newDoc = new PDDocument();
                 }
             }
-
             progress.updateProgress(i + 1);
         }
-
-        ut.setDestinationFileName(outputFile);
-        ut.mergeDocuments();
-
+        if (!separateFiles) {
+            newDoc.save(getOutputName(outputFile, o++));
+        }
+        newDoc.close();
+        if(originialPdfDoc != null) {
+            originialPdfDoc.close();
+        }
         progress.updateLog("Completed!");
+    }
+    
+    private String getOutputName(String name, int o) {
+        String out;
+        
+        if(name.toLowerCase().endsWith(".pdf")) {
+            out = name.substring(0, name.length()-4);
+        } else {
+            out = name;
+        }
+        
+        String testOut = out + "_" + o + ".pdf";
+        while((new File(testOut)).exists()) {
+            o++;
+            testOut = out + "_" + o + ".pdf";
+        }
+        
+        return testOut;
+    }
+    
+    private boolean isPDF(InputItem item) {
+        String file = item.getPath().toLowerCase();
+        
+        return file.endsWith(".pdf");
     }
     
     byte[] getImageAsByteArray(String file) throws IOException, COSVisitorException {
@@ -102,7 +179,7 @@ public class ProcessHandler {
         BufferedImage bufferedImage = loadImage(file);
 
         PDPage page = new PDPage(new PDRectangle(bufferedImage.getWidth(), bufferedImage.getHeight()));
-        doc.addPage(page);
+        doc.importPage(page);
 
         PDXObjectImage ximage = new PDJpeg(doc, bufferedImage, compression);
 
@@ -155,8 +232,8 @@ public class ProcessHandler {
     private boolean isEncrypted(String file) throws IOException {
         File originalPDF = new File(file);
         FileInputStream fis = new FileInputStream(originalPDF);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        PDFParser parser = new PDFParser(bis);
+//        BufferedInputStream bis = new BufferedInputStream(fis);
+        PDFParser parser = new PDFParser(fis);
         parser.parse();
 
         PDDocument originialPdfDoc = parser.getPDDocument();
@@ -168,6 +245,7 @@ public class ProcessHandler {
 //            originialPdfDoc.openProtection(new StandardDecryptionMaterial("password"));
 //        }
 
+        fis.close();
         return isOriginalDocEncrypted;
     }
     

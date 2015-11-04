@@ -1,14 +1,19 @@
 package com.vnaskos.pdfguru;
 
+import com.vnaskos.pdfguru.execute.OutputParameters;
 import com.vnaskos.pdfguru.execute.ProcessHandler;
 import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
+import com.vnaskos.pdfguru.input.items.InputItem;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  *
@@ -29,6 +34,32 @@ public class PDFGuru extends javax.swing.JFrame {
         fileChooser = new FileChooser(this);
         model = new DefaultListModel();
         inputList.setModel(model);
+        
+        jTextField1.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
+
+            public void warn() {
+                try {
+                    InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
+                    item.setPages(jTextField1.getText());
+                } catch(Exception e) {
+                    
+                }
+            }
+        });
     }
 
     /**
@@ -51,13 +82,16 @@ public class PDFGuru extends javax.swing.JFrame {
         outputPanel = new javax.swing.JPanel();
         outputBrowseButton = new javax.swing.JButton();
         outputFilepathField = new javax.swing.JTextField();
-        useTempCheckbox = new javax.swing.JCheckBox();
         compressionSpinner = new javax.swing.JSpinner();
         compressionLabel = new javax.swing.JLabel();
+        separateFilesCheckBox = new javax.swing.JCheckBox();
         okButton = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jTextField1 = new javax.swing.JTextField();
+        pagesHelpButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("PDF Guru v0.1");
+        setTitle("PDF Guru v0.2");
 
         inputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -96,6 +130,11 @@ public class PDFGuru extends javax.swing.JFrame {
             }
         });
 
+        inputList.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                inputListValueChanged(evt);
+            }
+        });
         inputScrollPane.setViewportView(inputList);
 
         javax.swing.GroupLayout inputPanelLayout = new javax.swing.GroupLayout(inputPanel);
@@ -104,15 +143,15 @@ public class PDFGuru extends javax.swing.JFrame {
             inputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(inputPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(addButton, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE)
+                .addComponent(addButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(upButton, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE)
+                .addComponent(upButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(downButton, javax.swing.GroupLayout.DEFAULT_SIZE, 69, Short.MAX_VALUE)
+                .addComponent(downButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(removeButton, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
+                .addComponent(removeButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(clearButton, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                .addComponent(clearButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
             .addComponent(inputScrollPane)
         );
@@ -141,11 +180,11 @@ public class PDFGuru extends javax.swing.JFrame {
 
         outputFilepathField.setText(System.getProperty("user.home"));
 
-        useTempCheckbox.setText("use temp files");
-
         compressionSpinner.setModel(new javax.swing.SpinnerNumberModel(Float.valueOf(0.5f), Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(0.1f)));
 
         compressionLabel.setText("compression:");
+
+        separateFilesCheckBox.setText("separate files");
 
         javax.swing.GroupLayout outputPanelLayout = new javax.swing.GroupLayout(outputPanel);
         outputPanel.setLayout(outputPanelLayout);
@@ -155,12 +194,12 @@ public class PDFGuru extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(outputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(outputPanelLayout.createSequentialGroup()
-                        .addComponent(outputFilepathField, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                        .addComponent(outputFilepathField)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(outputBrowseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(outputPanelLayout.createSequentialGroup()
-                        .addComponent(useTempCheckbox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(separateFilesCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 91, Short.MAX_VALUE)
                         .addComponent(compressionLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(compressionSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -174,10 +213,10 @@ public class PDFGuru extends javax.swing.JFrame {
                     .addComponent(outputFilepathField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(outputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(useTempCheckbox)
                     .addComponent(compressionSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(compressionLabel))
-                .addGap(7, 7, 7))
+                    .addComponent(compressionLabel)
+                    .addComponent(separateFilesCheckBox))
+                .addContainerGap())
         );
 
         okButton.setText("OK");
@@ -187,24 +226,57 @@ public class PDFGuru extends javax.swing.JFrame {
             }
         });
 
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Pages"));
+
+        pagesHelpButton.setText("?");
+        pagesHelpButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pagesHelpButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jTextField1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pagesHelpButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pagesHelpButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(inputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(outputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(okButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(outputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(inputPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(outputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(outputPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(okButton)
                 .addContainerGap())
         );
@@ -237,19 +309,43 @@ public class PDFGuru extends javax.swing.JFrame {
     }//GEN-LAST:event_outputBrowseButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        List<String> files = new ArrayList<String>();
-        boolean useTemp = useTempCheckbox.isSelected();
+        List<InputItem> files = new ArrayList<InputItem>();
+        boolean separateFiles = separateFilesCheckBox.isSelected();
         float compression = Float.parseFloat(compressionSpinner.getValue().toString());
         String output = outputFilepathField.getText();
         
         for(int i=0; i<model.getSize(); i++) {
-            String file = model.get(i).toString();
+            InputItem file = (InputItem) model.get(i);
             files.add(file);
         }
         
-        ProcessHandler handler = new ProcessHandler(files, useTemp, compression, output);
+        OutputParameters params = new OutputParameters.Builder()
+                .compression(compression)
+                .outputFile(output)
+                .separateFiles(separateFiles)
+                .build();
+        
+        ProcessHandler handler = new ProcessHandler(files, params);
         handler.execute();
     }//GEN-LAST:event_okButtonActionPerformed
+
+    private void inputListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_inputListValueChanged
+        try {
+            InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
+            jTextField1.setText(item.getPages());
+        } catch(Exception e) {
+            
+        }
+    }//GEN-LAST:event_inputListValueChanged
+
+    private void pagesHelpButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pagesHelpButtonActionPerformed
+        String dialogText = "Leave empty for all pages\nUse page numbers "
+                + "separated by comma \"1,2,3\"\nUse number intervals \"1-4\"\n"
+                + "Use | character to group results \"1-4|3-5|3,4\"\n"
+                + "1 is the first page, $ is the last";
+        
+        JOptionPane.showMessageDialog(this, dialogText);
+    }//GEN-LAST:event_pagesHelpButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -291,13 +387,16 @@ public class PDFGuru extends javax.swing.JFrame {
     private javax.swing.JList inputList;
     private javax.swing.JPanel inputPanel;
     private javax.swing.JScrollPane inputScrollPane;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JButton okButton;
     private javax.swing.JButton outputBrowseButton;
     private javax.swing.JTextField outputFilepathField;
     private javax.swing.JPanel outputPanel;
+    private javax.swing.JButton pagesHelpButton;
     private javax.swing.JButton removeButton;
+    private javax.swing.JCheckBox separateFilesCheckBox;
     private javax.swing.JButton upButton;
-    private javax.swing.JCheckBox useTempCheckbox;
     // End of variables declaration//GEN-END:variables
 
     private void addElements() {
@@ -312,7 +411,9 @@ public class PDFGuru extends javax.swing.JFrame {
 
         for (File[] directory : files) {
             for (File file : directory) {
-                model.add(model.size(), FilenameUtils.normalize(file.getPath()));
+                String path = FilenameUtils.normalize(file.getPath());
+                InputItem item = new InputItem(path);
+                model.add(model.size(), item);
             }
         }
     }
