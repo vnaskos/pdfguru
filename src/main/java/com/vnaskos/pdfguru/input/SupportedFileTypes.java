@@ -19,7 +19,7 @@ public class SupportedFileTypes {
                 "tga", "pdf"
         ));
         
-        return supportedInputExtensions.contains(fileType);
+        return supportedInputExtensions.contains(fileType.toLowerCase());
     }
     
     public static boolean isSupported(File file) {
