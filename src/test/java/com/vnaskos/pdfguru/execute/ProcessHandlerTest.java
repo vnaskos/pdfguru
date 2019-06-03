@@ -1,7 +1,6 @@
 package com.vnaskos.pdfguru.execute;
 
 import com.vnaskos.pdfguru.input.items.InputItem;
-import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.Test;
@@ -28,8 +27,7 @@ public class ProcessHandlerTest {
     private static final OutputParameters FAKE_OUTPUT = new OutputParameters("FAKE_OUTPUT_FILENAME");
 
     @Test
-    public void savePdfFromALoadedPdfOnComputer()
-            throws IOException, COSVisitorException {
+    public void savePdfFromALoadedPdfOnComputer() throws IOException {
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
         doNothing().when(processHandlerSpy).saveDocument();
 
@@ -40,8 +38,7 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void saveSinglePagePdfFromALoadedImageOnComputer()
-            throws IOException, COSVisitorException {
+    public void saveSinglePagePdfFromALoadedImageOnComputer() throws IOException {
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_128x128_IMG, FAKE_OUTPUT));
         doNothing().when(processHandlerSpy).saveDocument();
 
@@ -53,8 +50,7 @@ public class ProcessHandlerTest {
 
 
     @Test
-    public void saveOnePdfForEachInputIndividuallyShouldCreateThreePdf()
-            throws IOException, COSVisitorException {
+    public void saveOnePdfForEachInputIndividuallyShouldCreateThreePdf() throws IOException {
         List<InputItem> twoFiles = input("src/test/resources/5pages.pdf",
                 "src/test/resources/5pages.pdf", "src/test/resources/img128x128.jpg");
         FAKE_OUTPUT.setMultiFileOutput();
@@ -68,7 +64,7 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void stopProcessWhenRequestedByUser() throws IOException, COSVisitorException {
+    public void stopProcessWhenRequestedByUser() throws IOException {
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
 
         processHandlerSpy.requestStop();
@@ -78,8 +74,7 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void doNotSavePdfIfInputCouldNotBeLoaded()
-            throws IOException, COSVisitorException {
+    public void doNotSavePdfIfInputCouldNotBeLoaded() throws IOException {
         InputItem corruptedImage = new InputItem("CORRUPTED_IMAGE");
 
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(input(), FAKE_OUTPUT));
@@ -97,14 +92,6 @@ public class ProcessHandlerTest {
 
         assertThat(newPage.getMediaBox().getWidth(), is(RANDOM_WIDTH));
         assertThat(newPage.getMediaBox().getHeight(), is(RANDOM_HEIGHT));
-    }
-
-    @Test
-    public void checkingEncryptedPdfShouldBeIdentifiedAsEncryptedWithoutException() {
-        File encryptedPdf = new File("src/test/resources/5pages_encrypted.pdf");
-        ProcessHandler processHandlerSpy = spy(new ProcessHandler(input(), FAKE_OUTPUT));
-        boolean actualValue = processHandlerSpy.isFileEncrypted(encryptedPdf.getAbsolutePath());
-        assertThat(actualValue, is(true));
     }
 
     private static List<InputItem> input(String... localFilePaths) {

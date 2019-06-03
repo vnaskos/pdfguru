@@ -1,28 +1,23 @@
 package com.vnaskos.pdfguru.execute;
 
-import com.vnaskos.pdfguru.PDFGuru;
 import com.vnaskos.pdfguru.input.items.InputItem;
-import org.apache.pdfbox.exceptions.COSVisitorException;
-import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
-import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
+import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 
 /**
  *
@@ -39,7 +34,7 @@ public class ProcessHandler implements ExecutionControlListener {
     private PDDocument newDoc;
     private int fileIndex;
     private PDDocument originalPdfDoc;
-    private List<PDPage> pages;
+    private PDPageTree pages;
 
     public ProcessHandler(List<InputItem> inputItems, OutputParameters outputParameters) {
         this.inputItems = inputItems;
@@ -55,12 +50,12 @@ public class ProcessHandler implements ExecutionControlListener {
     private void tryToStartProcess() {
         try {
             startProcess();
-        } catch (IOException | COSVisitorException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(ProcessHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    void startProcess() throws IOException, COSVisitorException {
+    void startProcess() throws IOException {
         newDoc = new PDDocument();
 
         for (InputItem file : inputItems) {
@@ -93,7 +88,7 @@ public class ProcessHandler implements ExecutionControlListener {
         newDoc.importPage(page);
     }
 
-    void saveDocument() throws IOException, COSVisitorException {
+    void saveDocument() throws IOException {
         String name = getOutputName(outputParameters.getOutputFile(), fileIndex++);
         newDoc.save(name);
         newDoc.close();
@@ -104,15 +99,17 @@ public class ProcessHandler implements ExecutionControlListener {
     }
     
     private void addPDF(InputItem file)
-            throws IOException, COSVisitorException {
-        if (isFileEncrypted(file.getPath())) {
+            throws IOException {
+        originalPdfDoc = PDDocument.load(new File(file.getPath()));
+
+        if (originalPdfDoc.isEncrypted()) {
+            originalPdfDoc.close();
             progressListeners.forEach(l -> l.updateStatus("Skip encrypted! %s" + file));
             return;
         }
-        
-        originalPdfDoc = PDDocument.load(file.getPath());
+
         PDDocumentCatalog cat = originalPdfDoc.getDocumentCatalog();
-        pages = cat.getAllPages();
+        pages = cat.getPages();
         String pagesField = file.getPages();
         
         if (pagesField.isEmpty()) {
@@ -123,15 +120,15 @@ public class ProcessHandler implements ExecutionControlListener {
     }
     
     private void addAllPDFPages()
-            throws IOException, COSVisitorException {
+            throws IOException {
         for (PDPage p : pages) {
             addPage(p);
         }
     }
     
     private void addSelectedPDFPages(String pagesField)
-            throws IOException, COSVisitorException {
-        pagesField = pagesField.replaceAll("\\$", pages.size() + "");
+            throws IOException {
+        pagesField = pagesField.replaceAll("\\$", originalPdfDoc.getNumberOfPages() + "");
         String[] groups = pagesField.split("\\|");
         for (String g : groups) {
             createGroups(g);
@@ -172,16 +169,15 @@ public class ProcessHandler implements ExecutionControlListener {
             return;
         }
 
-        PDDocument tmpDoc = new PDDocument();
-        PDPage page = addBlankPage(tmpDoc, image.getWidth(), image.getHeight());
+        originalPdfDoc = new PDDocument();
+        PDPage page = addBlankPage(originalPdfDoc, image.getWidth(), image.getHeight());
+        PDImageXObject pdImage = JPEGFactory.createFromImage(originalPdfDoc, image, outputParameters.getCompression());
 
-        try (PDPageContentStream content = new PDPageContentStream(tmpDoc, page)) {
-            PDXObjectImage ximage = new PDJpeg(tmpDoc, image, outputParameters.getCompression());
-            content.drawImage(ximage, 0, 0);
+        try (PDPageContentStream contentStream = new PDPageContentStream(originalPdfDoc, page, APPEND, true, true)) {
+            contentStream.drawImage(pdImage, 0, 0, pdImage.getWidth(), pdImage.getHeight());
         }
 
         addPage(page);
-        tmpDoc.close();
     }
     
     private String getOutputName(String name, int o) {
@@ -208,7 +204,7 @@ public class ProcessHandler implements ExecutionControlListener {
         return file.endsWith(".pdf");
     }
     
-    BufferedImage loadImage(String file) {
+    private BufferedImage loadImage(String file) {
         BufferedImage bufferedImage;
 
         try {
@@ -226,45 +222,10 @@ public class ProcessHandler implements ExecutionControlListener {
     }
     
     public void execute() {
-        Runnable task = new Runnable() {
-
-            @Override
-            public void run() {
-                tryToStartProcess();
-            }
-        };
+        Runnable task = this::tryToStartProcess;
 
         Thread t1 = new Thread(task);
         t1.start();
-    }
-    
-    boolean isFileEncrypted(String file) {
-        try {
-            return isEncrypted(new File(file));
-        } catch (IOException ex) {
-            Logger.getLogger(PDFGuru.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return true;
-    }
-
-    private boolean isEncrypted(File originalPdfFile) throws IOException {
-        FileInputStream fis = new FileInputStream(originalPdfFile);
-//        BufferedInputStream bis = new BufferedInputStream(fis);
-        PDFParser parser = new PDFParser(fis);
-        parser.parse();
-
-        PDDocument pdfDoc = parser.getPDDocument();
-
-        boolean isOriginalDocEncrypted = pdfDoc.isEncrypted();
-        pdfDoc.close();
-        parser.clearResources();
-//        if (isOriginalDocEncrypted) {
-//            originalPdfDoc.openProtection(new StandardDecryptionMaterial("password"));
-//        }
-
-        fis.close();
-        return isOriginalDocEncrypted;
     }
 
     PDPage addBlankPage(PDDocument document, float width, float height) {
