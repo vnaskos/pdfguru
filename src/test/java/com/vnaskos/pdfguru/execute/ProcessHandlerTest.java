@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
@@ -21,19 +22,15 @@ public class ProcessHandlerTest {
     private static final float RANDOM_WIDTH = 100.0f;
     private static final float RANDOM_HEIGHT = 200.0f;
 
+    private static final List<InputItem> SAMPLE_5_PAGES_PDF = input("src/test/resources/5pages.pdf");
+    private static final List<InputItem> SAMPLE_128x128_IMG = input("src/test/resources/img128x128.jpg");
+
+    private static final OutputParameters FAKE_OUTPUT = new OutputParameters("FAKE_OUTPUT_FILENAME");
+
     @Test
     public void saveSinglePagePdfFromALoadedImageOnComputer()
             throws IOException, COSVisitorException {
-        List<InputItem> inputFiles = new ArrayList<>();
-
-        File inputImage = new File("src/test/resources/sample128x128.jpg");
-        InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
-        inputFiles.add(imageItem);
-
-        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
-                .singleFileOutput(true).build();
-        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
-        ProcessHandler processHandlerSpy = spy(processHandler);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_128x128_IMG, FAKE_OUTPUT));
         doNothing().when(processHandlerSpy).saveFile();
 
         processHandlerSpy.startProcess();
@@ -45,16 +42,7 @@ public class ProcessHandlerTest {
     @Test
     public void saveSinglePagePdfFromALoadedPdfOnComputer()
             throws IOException, COSVisitorException {
-        List<InputItem> inputFiles = new ArrayList<>();
-
-        File inputPdf = new File("src/test/resources/5pages.pdf");
-        InputItem imageItem = new InputItem(inputPdf.getAbsolutePath());
-        inputFiles.add(imageItem);
-
-        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
-                .singleFileOutput(true).build();
-        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
-        ProcessHandler processHandlerSpy = spy(processHandler);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
         doNothing().when(processHandlerSpy).saveFile();
 
         processHandlerSpy.startProcess();
@@ -65,16 +53,7 @@ public class ProcessHandlerTest {
 
     @Test
     public void stopProcessWhenRequestedByUser() throws IOException, COSVisitorException {
-        List<InputItem> inputFiles = new ArrayList<>();
-
-        File inputImage = new File("src/test/resources/sample128x128.jpg");
-        InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
-        inputFiles.add(imageItem);
-
-        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
-                .singleFileOutput(true).build();
-        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
-        ProcessHandler processHandlerSpy = spy(processHandler);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
 
         processHandlerSpy.requestStop();
         processHandlerSpy.startProcess();
@@ -83,34 +62,34 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void doNotSavePdfIfImageCouldNotBeLoaded()
+    public void doNotSavePdfIfInputCouldNotBeLoaded()
             throws IOException, COSVisitorException {
-        List<InputItem> inputFiles = new ArrayList<>();
+        InputItem corruptedImage = new InputItem("CORRUPTED_IMAGE");
 
-        File inputImage = new File("CORRUPTED_IMAGE");
-        InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
-        inputFiles.add(imageItem);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(input(), FAKE_OUTPUT));
 
-        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
-                .singleFileOutput(true).build();
-        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
-        ProcessHandler processHandlerSpy = spy(processHandler);
-        doReturn(null).when(processHandlerSpy).loadImage(any());
-
-        processHandlerSpy.addImage(inputFiles.get(0));
+        processHandlerSpy.addImage(corruptedImage);
 
         verify(processHandlerSpy, times(0)).saveFile();
     }
 
     @Test
     public void createNewPageWithGivenDimensions() {
-        List<InputItem> inputFiles = new ArrayList<>();
-        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME").build();
-        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
+        ProcessHandler processHandler = new ProcessHandler(input(), FAKE_OUTPUT);
 
         PDPage newPage = processHandler.addBlankPage(new PDDocument(), RANDOM_WIDTH, RANDOM_HEIGHT);
 
         assertThat(newPage.getMediaBox().getWidth(), is(RANDOM_WIDTH));
         assertThat(newPage.getMediaBox().getHeight(), is(RANDOM_HEIGHT));
+    }
+
+    private static List<InputItem> input(String... localFilePaths) {
+        List<InputItem> inputFiles = new ArrayList<>();
+        Arrays.stream(localFilePaths).forEach((filepath) -> {
+            File inputImage = new File(filepath);
+            InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
+            inputFiles.add(imageItem);
+        });
+        return inputFiles;
     }
 }

@@ -213,13 +213,18 @@ public class ProcessHandler implements ExecutionControlListener {
         return file.endsWith(".pdf");
     }
     
-    BufferedImage loadImage(String file) throws IOException {
-        BufferedImage bufferedImage = null;
+    BufferedImage loadImage(String file) {
+        BufferedImage bufferedImage;
 
         try {
             bufferedImage = Sanselan.getBufferedImage(new File(file));
-        } catch (ImageReadException ex) {
-            bufferedImage = ImageIO.read(new File(file));
+        } catch (IOException | ImageReadException ex) {
+            try {
+                bufferedImage = ImageIO.read(new File(file));
+            } catch (IOException e) {
+                // log: skip image, could not be loaded
+                return null;
+            }
         }
 
         return bufferedImage;

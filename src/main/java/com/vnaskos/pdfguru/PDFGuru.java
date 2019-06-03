@@ -334,10 +334,9 @@ public class PDFGuru extends javax.swing.JFrame {
             files.add(file);
         }
         
-        OutputParameters params = new OutputParameters.Builder(output)
-                .compression(compression)
-                .singleFileOutput(singleFileOutput)
-                .build();
+        OutputParameters params = new OutputParameters(output);
+        params.setCompression(compression);
+        params.setSingleFileOutput(singleFileOutput);
 
         ProcessHandler handler = new ProcessHandler(files, params);
         OutputDialog outputDialog = new OutputDialog(files.size(), handler);
