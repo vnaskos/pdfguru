@@ -100,7 +100,7 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void savingEncryptedPdfShouldThrowException() throws IOException {
+    public void checkingEncryptedPdfShouldBeIdentifiedAsEncryptedWithoutException() {
         File encryptedPdf = new File("src/test/resources/5pages_encrypted.pdf");
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(input(), FAKE_OUTPUT));
         boolean actualValue = processHandlerSpy.isFileEncrypted(encryptedPdf.getAbsolutePath());
