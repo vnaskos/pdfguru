@@ -3,16 +3,6 @@ package com.vnaskos.pdfguru.execute;
 import com.vnaskos.pdfguru.OutputDialog;
 import com.vnaskos.pdfguru.PDFGuru;
 import com.vnaskos.pdfguru.input.items.InputItem;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -24,6 +14,16 @@ import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
 import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -46,7 +46,7 @@ public class ProcessHandler {
         this.compression = params.getCompression();
         this.outputFile = params.getOutputFile();
         this.separateFiles = params.isSeparateFiles();
-        
+
         newDoc = new PDDocument();
         fileIndex = 1;
     }
@@ -166,7 +166,7 @@ public class ProcessHandler {
         }
     }
     
-    private void addImage(InputItem file)
+    void addImage(InputItem file)
             throws IOException, COSVisitorException {
         BufferedImage image = loadImage(file.getPath());
         
@@ -175,9 +175,9 @@ public class ProcessHandler {
             int height = image.getHeight();
             PDRectangle rect = new PDRectangle(width, height);
             PDPage page = new PDPage(rect);
-            
-            newDoc.addPage(page);
-            
+
+            addPage(page);
+
             PDXObjectImage ximage = new PDJpeg(newDoc, image, compression);
             PDPageContentStream content = new PDPageContentStream(newDoc, page);
             content.drawImage(ximage, 0, 0);
@@ -188,7 +188,11 @@ public class ProcessHandler {
             saveFile();
         }
     }
-    
+
+    void addPage(PDPage page) {
+        newDoc.addPage(page);
+    }
+
     private void saveFile() throws IOException, COSVisitorException {
         String name = getOutputName(outputFile, fileIndex++);
         newDoc.save(name);
@@ -219,29 +223,7 @@ public class ProcessHandler {
         return file.endsWith(".pdf");
     }
     
-    byte[] getImageAsByteArray(String file) throws IOException, COSVisitorException {
-        PDDocument doc = new PDDocument();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        BufferedImage bufferedImage = loadImage(file);
-
-        PDPage page = new PDPage(new PDRectangle(bufferedImage.getWidth(), bufferedImage.getHeight()));
-        doc.importPage(page);
-
-        PDXObjectImage ximage = new PDJpeg(doc, bufferedImage, compression);
-
-        PDPageContentStream content = new PDPageContentStream(doc, page);
-
-        content.drawImage(ximage, 0, 0);
-        content.close();
-
-        doc.save(baos);
-        doc.close();
-
-        return baos.toByteArray();
-    }
-    
-    private BufferedImage loadImage(String file) throws IOException {
+    BufferedImage loadImage(String file) throws IOException {
         BufferedImage bufferedImage = null;
 
         try {
