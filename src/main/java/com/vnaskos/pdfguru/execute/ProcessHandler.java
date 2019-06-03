@@ -45,7 +45,6 @@ public class ProcessHandler implements ExecutionControlListener {
         this.inputItems = inputItems;
         this.outputParameters = outputParameters;
 
-        newDoc = new PDDocument();
         fileIndex = 1;
     }
 
@@ -62,6 +61,8 @@ public class ProcessHandler implements ExecutionControlListener {
     }
     
     void startProcess() throws IOException, COSVisitorException {
+        newDoc = new PDDocument();
+
         for (InputItem file : inputItems) {
             if (stopRequested) {
                 return;
@@ -74,19 +75,28 @@ public class ProcessHandler implements ExecutionControlListener {
                 addImage(file);
             }
             progressListeners.forEach(ExecutionProgressListener::incrementProgress);
-        }
-        
-        saveAndCleanUp();
-        progressListeners.forEach(ExecutionProgressListener::finish);
-    }
 
-    private void saveAndCleanUp() throws IOException, COSVisitorException {
+            if (outputParameters.isMultipleFileOutput()) {
+                saveFile();
+                newDoc = new PDDocument();
+            }
+        }
+
         if (outputParameters.isSingleFileOutput()) {
             saveFile();
         }
-        
+
+        cleanup();
+        progressListeners.forEach(ExecutionProgressListener::finish);
+    }
+
+    void saveFile() throws IOException, COSVisitorException {
+        String name = getOutputName(outputParameters.getOutputFile(), fileIndex++);
+        newDoc.save(name);
         newDoc.close();
-        
+    }
+
+    private void cleanup() throws IOException {
         if (originialPdfDoc != null) {
             originialPdfDoc.close();
         }
@@ -116,9 +126,6 @@ public class ProcessHandler implements ExecutionControlListener {
         for (PDPage p : pages) {
             addPage(p);
         }
-        if (outputParameters.isMultipleFileOutput()) {
-            saveFile();
-        }
     }
     
     private void addSelectedPDFPages(String pagesField)
@@ -127,9 +134,6 @@ public class ProcessHandler implements ExecutionControlListener {
         String[] groups = pagesField.split("\\|");
         for (String g : groups) {
             createGroups(g);
-            if (outputParameters.isMultipleFileOutput()) {
-                saveFile();
-            }
         }
     }
     
@@ -160,8 +164,7 @@ public class ProcessHandler implements ExecutionControlListener {
         }
     }
     
-    void addImage(InputItem file)
-            throws IOException, COSVisitorException {
+    void addImage(InputItem file) throws IOException {
         BufferedImage image = loadImage(file.getPath());
         
         if (image == null) {
@@ -178,15 +181,6 @@ public class ProcessHandler implements ExecutionControlListener {
 
         addPage(page);
         tmpDoc.close();
-        if (outputParameters.isMultipleFileOutput()) {
-            saveFile();
-        }
-    }
-
-    void saveFile() throws IOException, COSVisitorException {
-        String name = getOutputName(outputParameters.getOutputFile(), fileIndex++);
-        newDoc.save(name);
-        newDoc = new PDDocument();
     }
     
     private String getOutputName(String name, int o) {
@@ -241,7 +235,7 @@ public class ProcessHandler implements ExecutionControlListener {
 
         Thread t1 = new Thread(task);
         t1.start();
-    };
+    }
     
     private boolean isFileEncrypted(String file) {
         try {

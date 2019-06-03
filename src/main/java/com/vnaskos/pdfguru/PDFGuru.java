@@ -325,7 +325,6 @@ public class PDFGuru extends javax.swing.JFrame {
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         List<InputItem> files = new ArrayList<InputItem>();
-        boolean singleFileOutput = !multipleFileOutputCheckBox.isSelected();
         float compression = Float.parseFloat(compressionSpinner.getValue().toString());
         String output = outputFilepathField.getText();
         
@@ -336,7 +335,9 @@ public class PDFGuru extends javax.swing.JFrame {
         
         OutputParameters params = new OutputParameters(output);
         params.setCompression(compression);
-        params.setSingleFileOutput(singleFileOutput);
+        if (multipleFileOutputCheckBox.isSelected()) {
+            params.setMultiFileOutput();
+        }
 
         ProcessHandler handler = new ProcessHandler(files, params);
         OutputDialog outputDialog = new OutputDialog(files.size(), handler);

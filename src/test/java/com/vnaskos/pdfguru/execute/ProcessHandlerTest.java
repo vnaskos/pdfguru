@@ -28,6 +28,18 @@ public class ProcessHandlerTest {
     private static final OutputParameters FAKE_OUTPUT = new OutputParameters("FAKE_OUTPUT_FILENAME");
 
     @Test
+    public void savePdfFromALoadedPdfOnComputer()
+            throws IOException, COSVisitorException {
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
+        doNothing().when(processHandlerSpy).saveFile();
+
+        processHandlerSpy.startProcess();
+
+        verify(processHandlerSpy, times(5)).addPage(any());
+        verify(processHandlerSpy, times(1)).saveFile();
+    }
+
+    @Test
     public void saveSinglePagePdfFromALoadedImageOnComputer()
             throws IOException, COSVisitorException {
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_128x128_IMG, FAKE_OUTPUT));
@@ -39,16 +51,20 @@ public class ProcessHandlerTest {
         verify(processHandlerSpy, times(1)).saveFile();
     }
 
+
     @Test
-    public void saveSinglePagePdfFromALoadedPdfOnComputer()
+    public void saveOnePdfForEachInputIndividuallyShouldCreateThreePdf()
             throws IOException, COSVisitorException {
-        ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
+        List<InputItem> twoFiles = input("src/test/resources/5pages.pdf",
+                "src/test/resources/5pages.pdf", "src/test/resources/img128x128.jpg");
+        FAKE_OUTPUT.setMultiFileOutput();
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(twoFiles, FAKE_OUTPUT));
         doNothing().when(processHandlerSpy).saveFile();
 
         processHandlerSpy.startProcess();
 
-        verify(processHandlerSpy, times(5)).addPage(any());
-        verify(processHandlerSpy, times(1)).saveFile();
+        verify(processHandlerSpy, times(11)).addPage(any());
+        verify(processHandlerSpy, times(3)).saveFile();
     }
 
     @Test

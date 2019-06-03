@@ -27,8 +27,8 @@ public class OutputParameters {
         this.compression = compression;
     }
 
-    public void setSingleFileOutput(boolean singleFileOutput) {
-        this.singleFileOutput = singleFileOutput;
+    public void setMultiFileOutput() {
+        this.singleFileOutput = false;
     }
 
     public boolean isSingleFileOutput() {
