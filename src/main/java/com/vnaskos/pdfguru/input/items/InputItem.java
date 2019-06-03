@@ -13,13 +13,19 @@ public class InputItem {
         this.path = path;
         pages = "";
     }
-    
-    public void setPages(String pages) {
-        this.pages = pages;
-    }
 
     public String getPath() {
         return path;
+    }
+
+    public boolean isPdf() {
+        String file = this.getPath().toLowerCase();
+
+        return file.endsWith(".pdf");
+    }
+
+    public void setPages(String pages) {
+        this.pages = pages;
     }
 
     public String getPages() {

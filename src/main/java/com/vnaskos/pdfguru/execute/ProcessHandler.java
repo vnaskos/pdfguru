@@ -58,16 +58,16 @@ public class ProcessHandler implements ExecutionControlListener {
     void startProcess() throws IOException {
         newDoc = new PDDocument();
 
-        for (InputItem file : inputItems) {
+        for (InputItem inputItem : inputItems) {
             if (stopRequested) {
                 return;
             }
 
-            progressListeners.forEach(l -> l.updateStatus(file.getPath()));
-            if (isPDF(file)) {
-                addPDF(file);
+            progressListeners.forEach(l -> l.updateStatus(inputItem.getPath()));
+            if (inputItem.isPdf()) {
+                addPDF(inputItem);
             } else {
-                addImage(file);
+                addImage(inputItem);
             }
             progressListeners.forEach(ExecutionProgressListener::incrementProgress);
 
@@ -196,12 +196,6 @@ public class ProcessHandler implements ExecutionControlListener {
         }
         
         return testOut;
-    }
-    
-    private boolean isPDF(InputItem item) {
-        String file = item.getPath().toLowerCase();
-        
-        return file.endsWith(".pdf");
     }
     
     private BufferedImage loadImage(String file) {
