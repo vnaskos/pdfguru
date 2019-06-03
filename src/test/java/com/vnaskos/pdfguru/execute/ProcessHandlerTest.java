@@ -37,7 +37,7 @@ public class ProcessHandlerTest {
 
         processHandlerSpy.startProcess();
 
-        verify(processHandlerSpy, times(1)).addBlankPage(128, 128);
+        verify(processHandlerSpy, times(1)).addBlankPage(any(), 128, 128);
         verify(processHandlerSpy, times(1)).saveFile();
     }
 
@@ -86,7 +86,7 @@ public class ProcessHandlerTest {
         OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME").build();
         ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
 
-        PDPage newPage = processHandler.addBlankPage(RANDOM_WIDTH, RANDOM_HEIGHT);
+        PDPage newPage = processHandler.addBlankPage(any(), RANDOM_WIDTH, RANDOM_HEIGHT);
 
         assertThat(newPage.getMediaBox().getWidth(), is(RANDOM_WIDTH));
         assertThat(newPage.getMediaBox().getHeight(), is(RANDOM_HEIGHT));

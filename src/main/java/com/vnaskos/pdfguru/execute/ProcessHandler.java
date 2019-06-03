@@ -168,13 +168,16 @@ public class ProcessHandler implements ExecutionControlListener {
             return;
         }
 
-        PDPage page = addBlankPage(image.getWidth(), image.getHeight());
+        PDDocument tmpDoc = new PDDocument();
+        PDPage page = addBlankPage(tmpDoc, image.getWidth(), image.getHeight());
 
-        try (PDPageContentStream content = new PDPageContentStream(newDoc, page)) {
-            PDXObjectImage ximage = new PDJpeg(newDoc, image, outputParameters.getCompression());
+        try (PDPageContentStream content = new PDPageContentStream(tmpDoc, page)) {
+            PDXObjectImage ximage = new PDJpeg(tmpDoc, image, outputParameters.getCompression());
             content.drawImage(ximage, 0, 0);
         }
 
+        newDoc.importPage(page);
+        tmpDoc.close();
         if (outputParameters.isMultipleFileOutput()) {
             saveFile();
         }
@@ -265,11 +268,11 @@ public class ProcessHandler implements ExecutionControlListener {
         return isOriginalDocEncrypted;
     }
 
-    PDPage addBlankPage(float width, float height) {
+    PDPage addBlankPage(PDDocument document, float width, float height) {
         PDPage page = new PDPage(
                 new PDRectangle(width, height));
 
-        newDoc.addPage(page);
+        document.addPage(page);
 
         return page;
     }
