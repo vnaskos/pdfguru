@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +31,9 @@ import java.util.logging.Logger;
  * @author Vasilis Naskos
  */
 public class ProcessHandler {
-    
+
+    private List<ExecutionProgressListener> progressListeners = new ArrayList<>();
+
     private final List<InputItem> files;
     private final boolean separateFiles;
     private final float compression;
@@ -51,6 +54,14 @@ public class ProcessHandler {
         fileIndex = 1;
     }
 
+    public void registerProgressListener(ExecutionProgressListener listener) {
+        progressListeners.add(listener);
+    }
+
+    public void removeProgressListener(ExecutionProgressListener listener) {
+        progressListeners.remove(listener);
+    }
+
     private void tryToStartProcess() {
         try {
             startProcess();
@@ -63,31 +74,30 @@ public class ProcessHandler {
     
     void startProcess() throws IOException, COSVisitorException {
         progress = createOutputDialog();
-        progress.setVisible(true);
-        progress.setProgressMax(files.size());
-        
-        for (int i=0; i<files.size(); i++) {
-            InputItem file = files.get(i);
-            
+
+        for (InputItem file : files) {
             if (!progress.isVisible()) {
                 return;
             }
-            
-            progress.updateLog(file.getPath());
+
+            progressListeners.forEach(l -> l.updateStatus(file.getPath()));
             if (isPDF(file)) {
                 addPDF(file);
             } else {
                 addImage(file);
             }
-            progress.updateProgress(i + 1);
+            progressListeners.forEach(ExecutionProgressListener::incrementProgress);
         }
         
         saveAndCleanUp();
-        progress.updateLog("Completed!");
+        progressListeners.forEach(ExecutionProgressListener::finish);
     }
 
     OutputDialog createOutputDialog() {
-        return new OutputDialog();
+        OutputDialog progress = new OutputDialog(files.size());
+        progress.setVisible(true);
+        registerProgressListener(progress);
+        return progress;
     }
 
     private void saveAndCleanUp() throws IOException, COSVisitorException {
@@ -105,7 +115,7 @@ public class ProcessHandler {
     private void addPDF(InputItem file)
             throws FileNotFoundException, IOException, COSVisitorException {
         if (isFileEncrypted(file.getPath())) {
-            progress.updateLog("Skip! " + file + " is encrypted");
+            progressListeners.forEach(l -> l.updateStatus("Skip encrypted! %s" + file));
             return;
         }
         

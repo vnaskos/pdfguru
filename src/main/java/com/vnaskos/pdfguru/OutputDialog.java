@@ -1,17 +1,23 @@
 package com.vnaskos.pdfguru;
 
+import com.vnaskos.pdfguru.execute.ExecutionProgressListener;
+
 import javax.swing.SwingUtilities;
 
 /**
  *
  * @author Vasilis Naskos
  */
-public class OutputDialog extends javax.swing.JFrame {
+public class OutputDialog extends javax.swing.JFrame implements ExecutionProgressListener {
+
+    private final int totalItemsToProcess;
+    private int processedItems = 0;
 
     /**
      * Creates new form OutputDialog
      */
-    public OutputDialog() {
+    public OutputDialog(int totalItemsToProcess) {
+        this.totalItemsToProcess = totalItemsToProcess;
         initComponents();
         this.setLocationRelativeTo(null);
     }
@@ -47,6 +53,7 @@ public class OutputDialog extends javax.swing.JFrame {
         logScrollPane.setViewportView(logTextArea);
 
         progressBar.setStringPainted(true);
+        progressBar.setMaximum(totalItemsToProcess);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -89,26 +96,23 @@ public class OutputDialog extends javax.swing.JFrame {
     private javax.swing.JProgressBar progressBar;
     // End of variables declaration//GEN-END:variables
 
-    public void updateLog(final String message) {
-        SwingUtilities.invokeLater(new Runnable() {
+    @Override
+    public void incrementProgress() {
+        processedItems++;
 
-            @Override
-            public void run() {
-                logTextArea.setText(message + "\n" + logTextArea.getText());
-            }
-        
-        });
+        SwingUtilities.invokeLater(() -> progressBar.setValue(processedItems));
     }
-    
-    public void updateProgress(int value) {
-        progressBar.setValue(value);
-        
-        if(value == progressBar.getMaximum()) {
-            cancelButton.setText("OK");
-        }
+
+    @Override
+    public void updateStatus(String status) {
+        SwingUtilities.invokeLater(() -> logTextArea.setText(
+                String.format("%s\n%s", status, logTextArea.getText())));
     }
-    
-    public void setProgressMax(int value) {
-        progressBar.setMaximum(value);
+
+    @Override
+    public void finish() {
+        updateStatus("Completed!");
+
+        cancelButton.setText("OK");
     }
 }

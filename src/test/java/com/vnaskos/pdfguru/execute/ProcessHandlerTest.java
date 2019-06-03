@@ -34,7 +34,7 @@ public class ProcessHandlerTest {
         ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
         ProcessHandler processHandlerSpy = spy(processHandler);
         doNothing().when(processHandlerSpy).saveFile();
-        
+
         OutputDialog fakeOutputDialog = mock(OutputDialog.class); // Horrible! Do not mock classes
         when(fakeOutputDialog.isVisible()).thenReturn(true);
         doReturn(fakeOutputDialog).when(processHandlerSpy).createOutputDialog();

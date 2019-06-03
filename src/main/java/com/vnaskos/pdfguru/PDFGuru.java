@@ -339,7 +339,7 @@ public class PDFGuru extends javax.swing.JFrame {
                 .outputFile(output)
                 .separateFiles(separateFiles)
                 .build();
-        
+
         ProcessHandler handler = new ProcessHandler(files, params);
         handler.execute();
     }//GEN-LAST:event_okButtonActionPerformed
