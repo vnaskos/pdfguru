@@ -38,7 +38,7 @@ public class ProcessHandler implements ExecutionControlListener {
 
     private PDDocument newDoc;
     private int fileIndex;
-    private PDDocument originialPdfDoc;
+    private PDDocument originalPdfDoc;
     private List<PDPage> pages;
 
     public ProcessHandler(List<InputItem> inputItems, OutputParameters outputParameters) {
@@ -86,7 +86,6 @@ public class ProcessHandler implements ExecutionControlListener {
             saveDocument();
         }
 
-        cleanup();
         progressListeners.forEach(ExecutionProgressListener::finish);
     }
 
@@ -98,11 +97,9 @@ public class ProcessHandler implements ExecutionControlListener {
         String name = getOutputName(outputParameters.getOutputFile(), fileIndex++);
         newDoc.save(name);
         newDoc.close();
-    }
 
-    private void cleanup() throws IOException {
-        if (originialPdfDoc != null) {
-            originialPdfDoc.close();
+        if (originalPdfDoc != null) {
+            originalPdfDoc.close();
         }
     }
     
@@ -113,8 +110,8 @@ public class ProcessHandler implements ExecutionControlListener {
             return;
         }
         
-        originialPdfDoc = PDDocument.load(file.getPath());
-        PDDocumentCatalog cat = originialPdfDoc.getDocumentCatalog();
+        originalPdfDoc = PDDocument.load(file.getPath());
+        PDDocumentCatalog cat = originalPdfDoc.getDocumentCatalog();
         pages = cat.getAllPages();
         String pagesField = file.getPages();
         
@@ -264,7 +261,7 @@ public class ProcessHandler implements ExecutionControlListener {
         pdfDoc.close();
         parser.clearResources();
 //        if (isOriginalDocEncrypted) {
-//            originialPdfDoc.openProtection(new StandardDecryptionMaterial("password"));
+//            originalPdfDoc.openProtection(new StandardDecryptionMaterial("password"));
 //        }
 
         fis.close();
