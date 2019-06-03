@@ -87,7 +87,7 @@ public class PDFGuru extends javax.swing.JFrame {
         outputFilepathField = new javax.swing.JTextField();
         compressionSpinner = new javax.swing.JSpinner();
         compressionLabel = new javax.swing.JLabel();
-        separateFilesCheckBox = new javax.swing.JCheckBox();
+        multipleFileOutputCheckBox = new javax.swing.JCheckBox();
         okButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jTextField1 = new javax.swing.JTextField();
@@ -188,7 +188,7 @@ public class PDFGuru extends javax.swing.JFrame {
 
         compressionLabel.setText("compression:");
 
-        separateFilesCheckBox.setText("separate files");
+        multipleFileOutputCheckBox.setText("Export in multiple files");
 
         javax.swing.GroupLayout outputPanelLayout = new javax.swing.GroupLayout(outputPanel);
         outputPanel.setLayout(outputPanelLayout);
@@ -202,7 +202,7 @@ public class PDFGuru extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(outputBrowseButton, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(outputPanelLayout.createSequentialGroup()
-                        .addComponent(separateFilesCheckBox)
+                        .addComponent(multipleFileOutputCheckBox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 94, Short.MAX_VALUE)
                         .addComponent(compressionLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -219,7 +219,7 @@ public class PDFGuru extends javax.swing.JFrame {
                 .addGroup(outputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(compressionSpinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(compressionLabel)
-                    .addComponent(separateFilesCheckBox))
+                    .addComponent(multipleFileOutputCheckBox))
                 .addContainerGap())
         );
 
@@ -325,7 +325,7 @@ public class PDFGuru extends javax.swing.JFrame {
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         List<InputItem> files = new ArrayList<InputItem>();
-        boolean separateFiles = separateFilesCheckBox.isSelected();
+        boolean singleFileOutput = !multipleFileOutputCheckBox.isSelected();
         float compression = Float.parseFloat(compressionSpinner.getValue().toString());
         String output = outputFilepathField.getText();
         
@@ -334,10 +334,9 @@ public class PDFGuru extends javax.swing.JFrame {
             files.add(file);
         }
         
-        OutputParameters params = new OutputParameters.Builder()
+        OutputParameters params = new OutputParameters.Builder(output)
                 .compression(compression)
-                .outputFile(output)
-                .separateFiles(separateFiles)
+                .singleFileOutput(singleFileOutput)
                 .build();
 
         ProcessHandler handler = new ProcessHandler(files, params);
@@ -418,7 +417,7 @@ public class PDFGuru extends javax.swing.JFrame {
     private javax.swing.JPanel outputPanel;
     private javax.swing.JButton pagesHelpButton;
     private javax.swing.JButton removeButton;
-    private javax.swing.JCheckBox separateFilesCheckBox;
+    private javax.swing.JCheckBox multipleFileOutputCheckBox;
     private javax.swing.JButton upButton;
     // End of variables declaration//GEN-END:variables
 

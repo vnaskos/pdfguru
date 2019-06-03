@@ -18,7 +18,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +33,17 @@ public class ProcessHandler implements ExecutionControlListener {
     private List<ExecutionProgressListener> progressListeners = new ArrayList<>();
     private boolean stopRequested = false;
 
-    private final List<InputItem> files;
-    private final boolean separateFiles;
-    private final float compression;
-    private final String outputFile;
+    private final List<InputItem> inputItems;
+    private final OutputParameters outputParameters;
+
     private PDDocument newDoc;
     private int fileIndex;
     private PDDocument originialPdfDoc;
     private List<PDPage> pages;
 
-    public ProcessHandler(List<InputItem> files, OutputParameters params) {
-        this.files = files;
-        this.compression = params.getCompression();
-        this.outputFile = params.getOutputFile();
-        this.separateFiles = params.isSeparateFiles();
+    public ProcessHandler(List<InputItem> inputItems, OutputParameters outputParameters) {
+        this.inputItems = inputItems;
+        this.outputParameters = outputParameters;
 
         newDoc = new PDDocument();
         fileIndex = 1;
@@ -60,15 +56,13 @@ public class ProcessHandler implements ExecutionControlListener {
     private void tryToStartProcess() {
         try {
             startProcess();
-        } catch (IOException ex) {
-            Logger.getLogger(ProcessHandler.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (COSVisitorException ex) {
+        } catch (IOException | COSVisitorException ex) {
             Logger.getLogger(ProcessHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
     void startProcess() throws IOException, COSVisitorException {
-        for (InputItem file : files) {
+        for (InputItem file : inputItems) {
             if (stopRequested) {
                 return;
             }
@@ -87,7 +81,7 @@ public class ProcessHandler implements ExecutionControlListener {
     }
 
     private void saveAndCleanUp() throws IOException, COSVisitorException {
-        if (!separateFiles) {
+        if (outputParameters.isSingleFileOutput()) {
             saveFile();
         }
         
@@ -99,7 +93,7 @@ public class ProcessHandler implements ExecutionControlListener {
     }
     
     private void addPDF(InputItem file)
-            throws FileNotFoundException, IOException, COSVisitorException {
+            throws IOException, COSVisitorException {
         if (isFileEncrypted(file.getPath())) {
             progressListeners.forEach(l -> l.updateStatus("Skip encrypted! %s" + file));
             return;
@@ -122,7 +116,7 @@ public class ProcessHandler implements ExecutionControlListener {
         for (PDPage p : pages) {
             newDoc.importPage(p);
         }
-        if (separateFiles) {
+        if (outputParameters.isMultipleFileOutput()) {
             saveFile();
         }
     }
@@ -133,7 +127,7 @@ public class ProcessHandler implements ExecutionControlListener {
         String[] groups = pagesField.split("\\|");
         for (String g : groups) {
             createGroups(g);
-            if (separateFiles) {
+            if (outputParameters.isMultipleFileOutput()) {
                 saveFile();
             }
         }
@@ -177,17 +171,17 @@ public class ProcessHandler implements ExecutionControlListener {
         PDPage page = addBlankPage(image.getWidth(), image.getHeight());
 
         try (PDPageContentStream content = new PDPageContentStream(newDoc, page)) {
-            PDXObjectImage ximage = new PDJpeg(newDoc, image, compression);
+            PDXObjectImage ximage = new PDJpeg(newDoc, image, outputParameters.getCompression());
             content.drawImage(ximage, 0, 0);
         }
 
-        if (separateFiles) {
+        if (outputParameters.isMultipleFileOutput()) {
             saveFile();
         }
     }
 
     void saveFile() throws IOException, COSVisitorException {
-        String name = getOutputName(outputFile, fileIndex++);
+        String name = getOutputName(outputParameters.getOutputFile(), fileIndex++);
         newDoc.save(name);
         newDoc = new PDDocument();
     }

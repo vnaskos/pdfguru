@@ -8,12 +8,12 @@ public class OutputParameters {
     
     private final float compression;
     private final String outputFile;
-    private final boolean separateFiles;
+    private final boolean singleFileOutput;
 
     private OutputParameters(Builder b) {
         this.compression = b.compression;
         this.outputFile = b.outputFile;
-        this.separateFiles = b.separateFiles;
+        this.singleFileOutput = b.singleFileOutput;
     }
     
     public float getCompression() {
@@ -24,27 +24,30 @@ public class OutputParameters {
         return outputFile;
     }
 
-    public boolean isSeparateFiles() {
-        return separateFiles;
+    public boolean isSingleFileOutput() {
+        return singleFileOutput;
     }
-    
+
+    public boolean isMultipleFileOutput() {
+        return !singleFileOutput;
+    }
+
     public static class Builder {
-        private float compression;
         private String outputFile;
-        private boolean separateFiles;
+        private float compression = 0.5f;
+        private boolean singleFileOutput = true;
+
+        public Builder(String outputFile) {
+            this.outputFile = outputFile;
+        }
         
         public Builder compression(float comp) {
             this.compression = comp;
             return this;
         }
         
-        public Builder outputFile(String out) {
-            this.outputFile = out;
-            return this;
-        }
-        
-        public Builder separateFiles(boolean sep) {
-            this.separateFiles = sep;
+        public Builder singleFileOutput(boolean singleFileOutput) {
+            this.singleFileOutput = singleFileOutput;
             return this;
         }
         

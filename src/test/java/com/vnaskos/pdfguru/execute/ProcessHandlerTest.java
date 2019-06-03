@@ -29,7 +29,8 @@ public class ProcessHandlerTest {
         InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
         inputFiles.add(imageItem);
 
-        OutputParameters outputParameters = new OutputParameters.Builder().separateFiles(true).build();
+        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
+                .singleFileOutput(true).build();
         ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
         ProcessHandler processHandlerSpy = spy(processHandler);
         doNothing().when(processHandlerSpy).saveFile();
@@ -48,7 +49,8 @@ public class ProcessHandlerTest {
         InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
         inputFiles.add(imageItem);
 
-        OutputParameters outputParameters = new OutputParameters.Builder().separateFiles(true).build();
+        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
+                .singleFileOutput(true).build();
         ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
         ProcessHandler processHandlerSpy = spy(processHandler);
 
@@ -67,7 +69,8 @@ public class ProcessHandlerTest {
         InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
         inputFiles.add(imageItem);
 
-        OutputParameters outputParameters = new OutputParameters.Builder().separateFiles(true).build();
+        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
+                .singleFileOutput(true).build();
         ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
         ProcessHandler processHandlerSpy = spy(processHandler);
         doReturn(null).when(processHandlerSpy).loadImage(any());
@@ -80,7 +83,7 @@ public class ProcessHandlerTest {
     @Test
     public void createNewPageWithGivenDimensions() {
         List<InputItem> inputFiles = new ArrayList<>();
-        OutputParameters outputParameters = new OutputParameters.Builder().build();
+        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME").build();
         ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
 
         PDPage newPage = processHandler.addBlankPage(RANDOM_WIDTH, RANDOM_HEIGHT);
