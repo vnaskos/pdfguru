@@ -238,9 +238,9 @@ public class ProcessHandler implements ExecutionControlListener {
         t1.start();
     }
     
-    private boolean isFileEncrypted(String file) {
+    boolean isFileEncrypted(String file) {
         try {
-            return isEncrypted(file);
+            return isEncrypted(new File(file));
         } catch (IOException ex) {
             Logger.getLogger(PDFGuru.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -248,9 +248,8 @@ public class ProcessHandler implements ExecutionControlListener {
         return true;
     }
 
-    private boolean isEncrypted(String file) throws IOException {
-        File originalPDF = new File(file);
-        FileInputStream fis = new FileInputStream(originalPDF);
+    private boolean isEncrypted(File originalPdfFile) throws IOException {
+        FileInputStream fis = new FileInputStream(originalPdfFile);
 //        BufferedInputStream bis = new BufferedInputStream(fis);
         PDFParser parser = new PDFParser(fis);
         parser.parse();

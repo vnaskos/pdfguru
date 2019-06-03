@@ -99,6 +99,14 @@ public class ProcessHandlerTest {
         assertThat(newPage.getMediaBox().getHeight(), is(RANDOM_HEIGHT));
     }
 
+    @Test
+    public void savingEncryptedPdfShouldThrowException() throws IOException {
+        File encryptedPdf = new File("src/test/resources/5pages_encrypted.pdf");
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(input(), FAKE_OUTPUT));
+        boolean actualValue = processHandlerSpy.isFileEncrypted(encryptedPdf.getAbsolutePath());
+        assertThat(actualValue, is(true));
+    }
+
     private static List<InputItem> input(String... localFilePaths) {
         List<InputItem> inputFiles = new ArrayList<>();
         Arrays.stream(localFilePaths).forEach((filepath) -> {
