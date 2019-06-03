@@ -2,7 +2,6 @@ package com.vnaskos.pdfguru.execute;
 
 import com.vnaskos.pdfguru.input.items.InputItem;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -19,15 +18,18 @@ public class ProcessHandler implements ExecutionControlListener {
     private final DocumentManager documentManager;
     private final List<InputItem> inputItems;
     private final OutputParameters outputParameters;
-
-    private int fileIndex;
+    private FileNamer fileNamer;
 
     public ProcessHandler(DocumentManager documentManager, List<InputItem> inputItems, OutputParameters outputParameters) {
         this.documentManager = documentManager;
         this.inputItems = inputItems;
         this.outputParameters = outputParameters;
 
-        fileIndex = 1;
+        this.setFileNamer(new FileNamer());
+    }
+
+    void setFileNamer(FileNamer fileNamer) {
+        this.fileNamer = fileNamer;
     }
 
     private void tryToStartProcess() {
@@ -62,28 +64,10 @@ public class ProcessHandler implements ExecutionControlListener {
     }
 
     private void saveDocument() throws IOException {
-        String name = getOutputName(outputParameters.getOutputFile(), fileIndex++);
+        String name = fileNamer.createUniqueOutputFileName(outputParameters.getOutputFile());
         documentManager.saveDocument(name);
     }
-    
-    private String getOutputName(String name, int o) {
-        String out;
-        
-        if(name.toLowerCase().endsWith(".pdf")) {
-            out = name.substring(0, name.length()-4);
-        } else {
-            out = name;
-        }
-        
-        String testOut = out + "_" + o + ".pdf";
-        while((new File(testOut)).exists()) {
-            o++;
-            testOut = out + "_" + o + ".pdf";
-        }
-        
-        return testOut;
-    }
-    
+
     public void execute() {
         Runnable task = this::tryToStartProcess;
 

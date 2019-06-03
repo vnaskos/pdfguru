@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -23,11 +24,11 @@ public class ProcessHandlerTest {
             "src/test/resources/5pages.pdf",
             "src/test/resources/img128x128.jpg");
 
-    private static final OutputParameters FAKE_OUTPUT = new OutputParameters("FAKE_OUTPUT_FILENAME");
+    private final OutputParameters fakeOutput = new OutputParameters("FAKE_OUTPUT_FILENAME");
 
     @Test
     public void saveLocalInputItemToSinglePdf() throws IOException {
-        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, SINGLE_FILE_INPUT, FAKE_OUTPUT);
+        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, SINGLE_FILE_INPUT, fakeOutput);
 
         processHandler.startProcess();
 
@@ -38,9 +39,8 @@ public class ProcessHandlerTest {
 
     @Test
     public void saveMultipleLocalInputItemsToIndividualPdfOneForEachInput() throws IOException {
-        OutputParameters multiFileOutput = new OutputParameters("FAKE_OUTPUT_FILEPATH");
-        multiFileOutput.setMultiFileOutput();
-        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, THREE_FILES_INPUT, multiFileOutput);
+        fakeOutput.setMultiFileOutput();
+        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
 
         processHandler.startProcess();
 
@@ -53,7 +53,7 @@ public class ProcessHandlerTest {
 
     @Test
     public void whenRequestedByUserStopProcess() throws IOException {
-        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, THREE_FILES_INPUT, FAKE_OUTPUT);
+        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
 
         processHandler.requestStop();
         processHandler.startProcess();
