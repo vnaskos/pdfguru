@@ -61,8 +61,8 @@ public class ProcessHandler {
         }
     }
     
-    private void startProcess() throws IOException, COSVisitorException {
-        progress = new OutputDialog();
+    void startProcess() throws IOException, COSVisitorException {
+        progress = createOutputDialog();
         progress.setVisible(true);
         progress.setProgressMax(files.size());
         
@@ -85,7 +85,11 @@ public class ProcessHandler {
         saveAndCleanUp();
         progress.updateLog("Completed!");
     }
-    
+
+    OutputDialog createOutputDialog() {
+        return new OutputDialog();
+    }
+
     private void saveAndCleanUp() throws IOException, COSVisitorException {
         if (!separateFiles) {
             saveFile();
@@ -170,18 +174,15 @@ public class ProcessHandler {
             throws IOException, COSVisitorException {
         BufferedImage image = loadImage(file.getPath());
         
-        if (image != null) {
-            int width = image.getWidth();
-            int height = image.getHeight();
-            PDRectangle rect = new PDRectangle(width, height);
-            PDPage page = new PDPage(rect);
+        if (image == null) {
+            return;
+        }
 
-            addPage(page);
+        PDPage page = addBlankPage(image.getWidth(), image.getHeight());
 
+        try (PDPageContentStream content = new PDPageContentStream(newDoc, page)) {
             PDXObjectImage ximage = new PDJpeg(newDoc, image, compression);
-            PDPageContentStream content = new PDPageContentStream(newDoc, page);
             content.drawImage(ximage, 0, 0);
-            content.close();
         }
 
         if (separateFiles) {
@@ -189,11 +190,7 @@ public class ProcessHandler {
         }
     }
 
-    void addPage(PDPage page) {
-        newDoc.addPage(page);
-    }
-
-    private void saveFile() throws IOException, COSVisitorException {
+    void saveFile() throws IOException, COSVisitorException {
         String name = getOutputName(outputFile, fileIndex++);
         newDoc.save(name);
         newDoc = new PDDocument();
@@ -277,5 +274,13 @@ public class ProcessHandler {
         fis.close();
         return isOriginalDocEncrypted;
     }
-    
+
+    PDPage addBlankPage(float width, float height) {
+        PDPage page = new PDPage(
+                new PDRectangle(width, height));
+
+        newDoc.addPage(page);
+
+        return page;
+    }
 }
