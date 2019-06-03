@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 
@@ -125,6 +126,26 @@ public class ProcessHandler implements ExecutionControlListener {
             addPage(p);
         }
     }
+
+    List<Integer> getSelectedPageIndicesFor(final String selectedPagesPattern, final int lastPage) {
+        List<Integer> selectedPages = new ArrayList<>();
+
+        String pagesPattern = selectedPagesPattern.replaceAll("\\$", String.valueOf(lastPage));
+
+        for (String pipeSeparatedPattern : pagesPattern.split("\\|")) {
+            for (String commaSeparatedPattern : pipeSeparatedPattern.split(",")) {
+                if (commaSeparatedPattern.contains("-")) {
+                    String[] limits = commaSeparatedPattern.split("-");
+                    IntStream.rangeClosed(Integer.parseInt(limits[0]), Integer.parseInt(limits[1]))
+                            .forEach(selectedPages::add);
+                } else {
+                    selectedPages.add(Integer.parseInt(commaSeparatedPattern));
+                }
+            }
+        }
+
+        return selectedPages;
+    }
     
     private void addSelectedPDFPages(String pagesField)
             throws IOException {
@@ -222,7 +243,7 @@ public class ProcessHandler implements ExecutionControlListener {
         t1.start();
     }
 
-    PDPage addBlankPage(PDDocument document, float width, float height) {
+    private PDPage addBlankPage(PDDocument document, float width, float height) {
         PDPage page = new PDPage(
                 new PDRectangle(width, height));
 

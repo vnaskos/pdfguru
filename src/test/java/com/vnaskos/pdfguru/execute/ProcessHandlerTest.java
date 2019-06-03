@@ -1,9 +1,9 @@
 package com.vnaskos.pdfguru.execute;
 
 import com.vnaskos.pdfguru.input.items.InputItem;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,16 +11,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class ProcessHandlerTest {
 
-    private static final float RANDOM_WIDTH = 100.0f;
-    private static final float RANDOM_HEIGHT = 200.0f;
+    private static final int LAST_PAGE = 12;
 
+    private static final List<InputItem> WHATEVER_INPUT = input();
     private static final List<InputItem> SAMPLE_5_PAGES_PDF = input("src/test/resources/5pages.pdf");
     private static final List<InputItem> SAMPLE_128x128_IMG = input("src/test/resources/img128x128.jpg");
 
@@ -44,8 +43,13 @@ public class ProcessHandlerTest {
 
         processHandlerSpy.startProcess();
 
-        verify(processHandlerSpy, times(1)).addPage(any());
+        ArgumentCaptor<PDPage> captor = ArgumentCaptor.forClass(PDPage.class);
+        verify(processHandlerSpy, times(1)).addPage(captor.capture());
         verify(processHandlerSpy, times(1)).saveDocument();
+
+        PDPage actualPage = captor.getValue();
+        assertThat(actualPage.getMediaBox().getWidth()).isEqualTo(128.0f);
+        assertThat(actualPage.getMediaBox().getHeight()).isEqualTo(128.0f);
     }
 
 
@@ -64,7 +68,7 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void stopProcessWhenRequestedByUser() throws IOException {
+    public void whenRequestedByUserStopProcess() throws IOException {
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
 
         processHandlerSpy.requestStop();
@@ -77,7 +81,7 @@ public class ProcessHandlerTest {
     public void doNotSavePdfIfInputCouldNotBeLoaded() throws IOException {
         InputItem corruptedImage = new InputItem("CORRUPTED_IMAGE");
 
-        ProcessHandler processHandlerSpy = spy(new ProcessHandler(input(), FAKE_OUTPUT));
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(WHATEVER_INPUT, FAKE_OUTPUT));
 
         processHandlerSpy.addImage(corruptedImage);
 
@@ -85,13 +89,70 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void createNewPageWithGivenDimensions() {
-        ProcessHandler processHandler = new ProcessHandler(input(), FAKE_OUTPUT);
+    public void selectOnePageShouldReturnThatPageIndex() {
+        final String secondPageOnly = "2";
 
-        PDPage newPage = processHandler.addBlankPage(new PDDocument(), RANDOM_WIDTH, RANDOM_HEIGHT);
+        InputItem inputItem = new InputItem("");
+        inputItem.setPages(secondPageOnly);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(WHATEVER_INPUT, FAKE_OUTPUT));
 
-        assertThat(newPage.getMediaBox().getWidth(), is(RANDOM_WIDTH));
-        assertThat(newPage.getMediaBox().getHeight(), is(RANDOM_HEIGHT));
+        List<Integer> selectedPages = processHandlerSpy.getSelectedPageIndicesFor(inputItem.getPages(), LAST_PAGE);
+
+        assertThat(selectedPages).hasSize(1);
+        assertThat(selectedPages).contains(2);
+    }
+
+    @Test
+    public void selectTwoPagesShouldReturnThosePageIndices() {
+        final String secondAndFourthPagesOnly = "2,4";
+
+        InputItem inputItem = new InputItem("");
+        inputItem.setPages(secondAndFourthPagesOnly);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(WHATEVER_INPUT, FAKE_OUTPUT));
+
+        List<Integer> selectedPages = processHandlerSpy.getSelectedPageIndicesFor(inputItem.getPages(), LAST_PAGE);
+
+        assertThat(selectedPages).containsExactly(2,4);
+    }
+
+    @Test
+    public void selectPageRangeShouldReturnListOfAllThePageIndicesIncludedInRange() {
+        final String fromTheThirdTillTheFifthPage = "3-5";
+
+        InputItem inputItem = new InputItem("");
+        inputItem.setPages(fromTheThirdTillTheFifthPage);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(WHATEVER_INPUT, FAKE_OUTPUT));
+
+        List<Integer> selectedPages = processHandlerSpy.getSelectedPageIndicesFor(inputItem.getPages(), LAST_PAGE);
+
+        assertThat(selectedPages).containsExactly(3,4,5);
+    }
+
+    @Test
+    public void selectTheLastPageByProvidingTheDollarSignShouldReturnTheLastPageIndex() {
+        final String onlyTheLastPage = "$";
+
+        InputItem inputItem = new InputItem("");
+        inputItem.setPages(onlyTheLastPage);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(WHATEVER_INPUT, FAKE_OUTPUT));
+
+        List<Integer> selectedPages = processHandlerSpy.getSelectedPageIndicesFor(inputItem.getPages(), LAST_PAGE);
+
+        assertThat(selectedPages).containsExactly(LAST_PAGE);
+    }
+
+    @Test
+    public void selectTwoGroupsOfPagesByUsingThePipeSymbolShouldIncludeBothGroupIndices() {
+        final String groupOfPages = "2,4|10-$";
+        final int lastPage = 12;
+
+        InputItem inputItem = new InputItem("");
+        inputItem.setPages(groupOfPages);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(WHATEVER_INPUT, FAKE_OUTPUT));
+
+        List<Integer> selectedPages = processHandlerSpy.getSelectedPageIndicesFor(inputItem.getPages(), lastPage);
+
+        assertThat(selectedPages).containsExactly(2,4,10,11,12);
     }
 
     private static List<InputItem> input(String... localFilePaths) {
