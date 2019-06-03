@@ -2,6 +2,7 @@ package com.vnaskos.pdfguru.execute;
 
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.exceptions.COSVisitorException;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.Test;
 
@@ -37,7 +38,28 @@ public class ProcessHandlerTest {
 
         processHandlerSpy.startProcess();
 
-        verify(processHandlerSpy, times(1)).addBlankPage(any(), 128, 128);
+        verify(processHandlerSpy, times(1)).addPage(any());
+        verify(processHandlerSpy, times(1)).saveFile();
+    }
+
+    @Test
+    public void saveSinglePagePdfFromALoadedPdfOnComputer()
+            throws IOException, COSVisitorException {
+        List<InputItem> inputFiles = new ArrayList<>();
+
+        File inputPdf = new File("src/test/resources/5pages.pdf");
+        InputItem imageItem = new InputItem(inputPdf.getAbsolutePath());
+        inputFiles.add(imageItem);
+
+        OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME")
+                .singleFileOutput(true).build();
+        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
+        ProcessHandler processHandlerSpy = spy(processHandler);
+        doNothing().when(processHandlerSpy).saveFile();
+
+        processHandlerSpy.startProcess();
+
+        verify(processHandlerSpy, times(5)).addPage(any());
         verify(processHandlerSpy, times(1)).saveFile();
     }
 
@@ -86,7 +108,7 @@ public class ProcessHandlerTest {
         OutputParameters outputParameters = new OutputParameters.Builder("FAKE_OUTPUT_FILENAME").build();
         ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
 
-        PDPage newPage = processHandler.addBlankPage(any(), RANDOM_WIDTH, RANDOM_HEIGHT);
+        PDPage newPage = processHandler.addBlankPage(new PDDocument(), RANDOM_WIDTH, RANDOM_HEIGHT);
 
         assertThat(newPage.getMediaBox().getWidth(), is(RANDOM_WIDTH));
         assertThat(newPage.getMediaBox().getHeight(), is(RANDOM_HEIGHT));

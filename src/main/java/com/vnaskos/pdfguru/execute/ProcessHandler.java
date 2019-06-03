@@ -114,7 +114,7 @@ public class ProcessHandler implements ExecutionControlListener {
     private void addAllPDFPages()
             throws IOException, COSVisitorException {
         for (PDPage p : pages) {
-            newDoc.importPage(p);
+            addPage(p);
         }
         if (outputParameters.isMultipleFileOutput()) {
             saveFile();
@@ -140,7 +140,7 @@ public class ProcessHandler implements ExecutionControlListener {
                 addPagesWithInterval(sub);
             } else {
                 int p = Integer.parseInt(sub);
-                newDoc.importPage(pages.get(p - 1));
+                addPage(pages.get(p - 1));
             }
         }
     }
@@ -151,11 +151,11 @@ public class ProcessHandler implements ExecutionControlListener {
         int lim1 = Integer.parseInt(lim[1]);
         if (lim0 < lim1) {
             for (int j = lim0; j <= lim1; j++) {
-                newDoc.importPage(pages.get(j - 1));
+                addPage(pages.get(j - 1));
             }
         } else {
             for (int j = lim0; j >= lim1; j--) {
-                newDoc.importPage(pages.get(j - 1));
+                addPage(pages.get(j - 1));
             }
         }
     }
@@ -176,7 +176,7 @@ public class ProcessHandler implements ExecutionControlListener {
             content.drawImage(ximage, 0, 0);
         }
 
-        newDoc.importPage(page);
+        addPage(page);
         tmpDoc.close();
         if (outputParameters.isMultipleFileOutput()) {
             saveFile();
@@ -275,6 +275,10 @@ public class ProcessHandler implements ExecutionControlListener {
         document.addPage(page);
 
         return page;
+    }
+
+    void addPage(PDPage page) throws IOException {
+        newDoc.importPage(page);
     }
 
     @Override
