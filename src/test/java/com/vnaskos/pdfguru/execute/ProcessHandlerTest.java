@@ -46,6 +46,24 @@ public class ProcessHandlerTest {
     }
 
     @Test
+    public void stopProcessWhenRequestedByUser() throws IOException, COSVisitorException {
+        List<InputItem> inputFiles = new ArrayList<>();
+
+        File inputImage = new File("src/test/resources/sample128x128.jpg");
+        InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
+        inputFiles.add(imageItem);
+
+        OutputParameters outputParameters = new OutputParameters.Builder().separateFiles(true).build();
+        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
+        ProcessHandler processHandlerSpy = spy(processHandler);
+
+        processHandlerSpy.requestStop();
+        processHandlerSpy.startProcess();
+
+        verify(processHandlerSpy, times(0)).saveFile();
+    }
+
+    @Test
     public void addNewPageToPdfFromALoadedImageOnComputer()
             throws IOException, COSVisitorException {
         List<InputItem> inputFiles = new ArrayList<>();

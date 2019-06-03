@@ -30,9 +30,10 @@ import java.util.logging.Logger;
  *
  * @author Vasilis Naskos
  */
-public class ProcessHandler {
+public class ProcessHandler implements ExecutionControlListener {
 
     private List<ExecutionProgressListener> progressListeners = new ArrayList<>();
+    private boolean stopRequested = false;
 
     private final List<InputItem> files;
     private final boolean separateFiles;
@@ -76,7 +77,7 @@ public class ProcessHandler {
         progress = createOutputDialog();
 
         for (InputItem file : files) {
-            if (!progress.isVisible()) {
+            if (stopRequested) {
                 return;
             }
 
@@ -94,7 +95,7 @@ public class ProcessHandler {
     }
 
     OutputDialog createOutputDialog() {
-        OutputDialog progress = new OutputDialog(files.size());
+        OutputDialog progress = new OutputDialog(files.size(), this);
         progress.setVisible(true);
         registerProgressListener(progress);
         return progress;
@@ -292,5 +293,10 @@ public class ProcessHandler {
         newDoc.addPage(page);
 
         return page;
+    }
+
+    @Override
+    public void requestStop() {
+        this.stopRequested = true;
     }
 }
