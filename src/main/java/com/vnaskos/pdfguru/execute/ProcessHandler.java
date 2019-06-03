@@ -4,8 +4,6 @@ import com.vnaskos.pdfguru.input.items.InputItem;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -31,16 +29,8 @@ public class ProcessHandler implements ExecutionControlListener {
     void setFileNamer(FileNamer fileNamer) {
         this.fileNamer = fileNamer;
     }
-
-    private void tryToStartProcess() {
-        try {
-            startProcess();
-        } catch (IOException ex) {
-            Logger.getLogger(ProcessHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
     
-    void startProcess() throws IOException {
+    public void startProcess() throws IOException {
         documentManager.openNewDocument();
 
         for (InputItem inputItem : inputItems) {
@@ -66,13 +56,6 @@ public class ProcessHandler implements ExecutionControlListener {
     private void saveDocument() throws IOException {
         String name = fileNamer.createUniqueOutputFileName(outputParameters.getOutputFile());
         documentManager.saveDocument(name);
-    }
-
-    public void execute() {
-        Runnable task = this::tryToStartProcess;
-
-        Thread t1 = new Thread(task);
-        t1.start();
     }
 
     @Override

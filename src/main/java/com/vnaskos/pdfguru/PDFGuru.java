@@ -9,8 +9,11 @@ import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -346,7 +349,15 @@ public class PDFGuru extends javax.swing.JFrame {
         OutputDialog outputDialog = new OutputDialog(files.size(), handler);
         outputDialog.setVisible(true);
         documentManager.registerProgressListener(outputDialog);
-        handler.execute();
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            try {
+                handler.startProcess();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }//GEN-LAST:event_okButtonActionPerformed
 
     private void inputListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_inputListValueChanged
