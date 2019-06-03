@@ -1,6 +1,5 @@
 package com.vnaskos.pdfguru.execute;
 
-import com.vnaskos.pdfguru.OutputDialog;
 import com.vnaskos.pdfguru.PDFGuru;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.exceptions.COSVisitorException;
@@ -41,7 +40,6 @@ public class ProcessHandler implements ExecutionControlListener {
     private final String outputFile;
     private PDDocument newDoc;
     private int fileIndex;
-    private OutputDialog progress;
     private PDDocument originialPdfDoc;
     private List<PDPage> pages;
 
@@ -59,10 +57,6 @@ public class ProcessHandler implements ExecutionControlListener {
         progressListeners.add(listener);
     }
 
-    public void removeProgressListener(ExecutionProgressListener listener) {
-        progressListeners.remove(listener);
-    }
-
     private void tryToStartProcess() {
         try {
             startProcess();
@@ -74,8 +68,6 @@ public class ProcessHandler implements ExecutionControlListener {
     }
     
     void startProcess() throws IOException, COSVisitorException {
-        progress = createOutputDialog();
-
         for (InputItem file : files) {
             if (stopRequested) {
                 return;
@@ -92,13 +84,6 @@ public class ProcessHandler implements ExecutionControlListener {
         
         saveAndCleanUp();
         progressListeners.forEach(ExecutionProgressListener::finish);
-    }
-
-    OutputDialog createOutputDialog() {
-        OutputDialog progress = new OutputDialog(files.size(), this);
-        progress.setVisible(true);
-        registerProgressListener(progress);
-        return progress;
     }
 
     private void saveAndCleanUp() throws IOException, COSVisitorException {

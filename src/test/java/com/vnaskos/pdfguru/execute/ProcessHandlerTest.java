@@ -1,6 +1,5 @@
 package com.vnaskos.pdfguru.execute;
 
-import com.vnaskos.pdfguru.OutputDialog;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -35,10 +34,6 @@ public class ProcessHandlerTest {
         ProcessHandler processHandlerSpy = spy(processHandler);
         doNothing().when(processHandlerSpy).saveFile();
 
-        OutputDialog fakeOutputDialog = mock(OutputDialog.class); // Horrible! Do not mock classes
-        when(fakeOutputDialog.isVisible()).thenReturn(true);
-        doReturn(fakeOutputDialog).when(processHandlerSpy).createOutputDialog();
-
         processHandlerSpy.startProcess();
 
         verify(processHandlerSpy, times(1)).addBlankPage(128, 128);
@@ -64,25 +59,7 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void addNewPageToPdfFromALoadedImageOnComputer()
-            throws IOException, COSVisitorException {
-        List<InputItem> inputFiles = new ArrayList<>();
-
-        File inputImage = new File("src/test/resources/sample128x128.jpg");
-        InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
-        inputFiles.add(imageItem);
-
-        OutputParameters outputParameters = new OutputParameters.Builder().build();
-        ProcessHandler processHandler = new ProcessHandler(inputFiles, outputParameters);
-        ProcessHandler processHandlerSpy = spy(processHandler);
-
-        processHandlerSpy.addImage(inputFiles.get(0));
-
-        verify(processHandlerSpy, times(1)).addBlankPage(128, 128);
-    }
-
-    @Test
-    public void doNotSavePdfIfImageCouldNotLoad()
+    public void doNotSavePdfIfImageCouldNotBeLoaded()
             throws IOException, COSVisitorException {
         List<InputItem> inputFiles = new ArrayList<>();
 

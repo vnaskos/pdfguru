@@ -341,6 +341,9 @@ public class PDFGuru extends javax.swing.JFrame {
                 .build();
 
         ProcessHandler handler = new ProcessHandler(files, params);
+        OutputDialog outputDialog = new OutputDialog(files.size(), handler);
+        outputDialog.setVisible(true);
+        handler.registerProgressListener(outputDialog);
         handler.execute();
     }//GEN-LAST:event_okButtonActionPerformed
 
