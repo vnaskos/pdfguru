@@ -35,7 +35,6 @@ public class ProcessHandler implements ExecutionControlListener {
     private PDDocument newDoc;
     private int fileIndex;
     private PDDocument originalPdfDoc;
-    private PDPageTree pages;
 
     public ProcessHandler(List<InputItem> inputItems, OutputParameters outputParameters) {
         this.inputItems = inputItems;
@@ -110,27 +109,24 @@ public class ProcessHandler implements ExecutionControlListener {
         }
 
         PDDocumentCatalog cat = originalPdfDoc.getDocumentCatalog();
-        pages = cat.getPages();
-        String pagesField = file.getPages();
-        
-        if (pagesField.isEmpty()) {
-            addAllPDFPages();
-        } else {
-            addSelectedPDFPages(pagesField);
-        }
-    }
-    
-    private void addAllPDFPages()
-            throws IOException {
-        for (PDPage p : pages) {
-            addPage(p);
+        PDPageTree pages = cat.getPages();
+        String pagesPattern = file.getPages();
+
+        for (int page : getSelectedPageIndicesFor(pagesPattern, originalPdfDoc.getNumberOfPages())) {
+            addPage(pages.get(page-1));
         }
     }
 
     List<Integer> getSelectedPageIndicesFor(final String selectedPagesPattern, final int lastPage) {
         List<Integer> selectedPages = new ArrayList<>();
 
-        String pagesPattern = selectedPagesPattern.replaceAll("\\$", String.valueOf(lastPage));
+        String pagesPattern = selectedPagesPattern;
+
+        if (pagesPattern.isEmpty()) {
+            pagesPattern = "1-$";
+        }
+
+        pagesPattern = pagesPattern.replaceAll("\\$", String.valueOf(lastPage));
 
         for (String pipeSeparatedPattern : pagesPattern.split("\\|")) {
             for (String commaSeparatedPattern : pipeSeparatedPattern.split(",")) {
@@ -145,42 +141,6 @@ public class ProcessHandler implements ExecutionControlListener {
         }
 
         return selectedPages;
-    }
-    
-    private void addSelectedPDFPages(String pagesField)
-            throws IOException {
-        pagesField = pagesField.replaceAll("\\$", originalPdfDoc.getNumberOfPages() + "");
-        String[] groups = pagesField.split("\\|");
-        for (String g : groups) {
-            createGroups(g);
-        }
-    }
-    
-    private void createGroups(String g) throws IOException {
-        String[] subGroups = g.split(",");
-        for (String sub : subGroups) {
-            if (sub.contains("-")) {
-                addPagesWithInterval(sub);
-            } else {
-                int p = Integer.parseInt(sub);
-                addPage(pages.get(p - 1));
-            }
-        }
-    }
-    
-    private void addPagesWithInterval(String sub) throws IOException {
-        String[] lim = sub.split("-");
-        int lim0 = Integer.parseInt(lim[0]);
-        int lim1 = Integer.parseInt(lim[1]);
-        if (lim0 < lim1) {
-            for (int j = lim0; j <= lim1; j++) {
-                addPage(pages.get(j - 1));
-            }
-        } else {
-            for (int j = lim0; j >= lim1; j--) {
-                addPage(pages.get(j - 1));
-            }
-        }
     }
     
     void addImage(InputItem file) throws IOException {

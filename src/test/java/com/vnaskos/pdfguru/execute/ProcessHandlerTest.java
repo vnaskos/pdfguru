@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 public class ProcessHandlerTest {
 
-    private static final int LAST_PAGE = 12;
+    private static final int LAST_PAGE = 5;
 
     private static final List<InputItem> WHATEVER_INPUT = input();
     private static final List<InputItem> SAMPLE_5_PAGES_PDF = input("src/test/resources/5pages.pdf");
@@ -153,6 +154,19 @@ public class ProcessHandlerTest {
         List<Integer> selectedPages = processHandlerSpy.getSelectedPageIndicesFor(inputItem.getPages(), lastPage);
 
         assertThat(selectedPages).containsExactly(2,4,10,11,12);
+    }
+
+    @Test
+    public void selectAllPagesByProvidingEmptyPattenShouldReturnAllPageIndices() {
+        final String allPages = "";
+
+        InputItem inputItem = new InputItem("");
+        inputItem.setPages(allPages);
+        ProcessHandler processHandlerSpy = spy(new ProcessHandler(WHATEVER_INPUT, FAKE_OUTPUT));
+
+        List<Integer> selectedPages = processHandlerSpy.getSelectedPageIndicesFor(inputItem.getPages(), LAST_PAGE);
+
+        assertThat(selectedPages).containsExactly(IntStream.rangeClosed(1, LAST_PAGE).boxed().toArray(Integer[]::new));
     }
 
     private static List<InputItem> input(String... localFilePaths) {
