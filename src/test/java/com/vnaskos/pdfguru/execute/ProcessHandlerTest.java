@@ -31,24 +31,24 @@ public class ProcessHandlerTest {
     public void savePdfFromALoadedPdfOnComputer()
             throws IOException, COSVisitorException {
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_5_PAGES_PDF, FAKE_OUTPUT));
-        doNothing().when(processHandlerSpy).saveFile();
+        doNothing().when(processHandlerSpy).saveDocument();
 
         processHandlerSpy.startProcess();
 
         verify(processHandlerSpy, times(5)).addPage(any());
-        verify(processHandlerSpy, times(1)).saveFile();
+        verify(processHandlerSpy, times(1)).saveDocument();
     }
 
     @Test
     public void saveSinglePagePdfFromALoadedImageOnComputer()
             throws IOException, COSVisitorException {
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(SAMPLE_128x128_IMG, FAKE_OUTPUT));
-        doNothing().when(processHandlerSpy).saveFile();
+        doNothing().when(processHandlerSpy).saveDocument();
 
         processHandlerSpy.startProcess();
 
         verify(processHandlerSpy, times(1)).addPage(any());
-        verify(processHandlerSpy, times(1)).saveFile();
+        verify(processHandlerSpy, times(1)).saveDocument();
     }
 
 
@@ -59,12 +59,12 @@ public class ProcessHandlerTest {
                 "src/test/resources/5pages.pdf", "src/test/resources/img128x128.jpg");
         FAKE_OUTPUT.setMultiFileOutput();
         ProcessHandler processHandlerSpy = spy(new ProcessHandler(twoFiles, FAKE_OUTPUT));
-        doNothing().when(processHandlerSpy).saveFile();
+        doNothing().when(processHandlerSpy).saveDocument();
 
         processHandlerSpy.startProcess();
 
         verify(processHandlerSpy, times(11)).addPage(any());
-        verify(processHandlerSpy, times(3)).saveFile();
+        verify(processHandlerSpy, times(3)).saveDocument();
     }
 
     @Test
@@ -74,7 +74,7 @@ public class ProcessHandlerTest {
         processHandlerSpy.requestStop();
         processHandlerSpy.startProcess();
 
-        verify(processHandlerSpy, times(0)).saveFile();
+        verify(processHandlerSpy, times(0)).saveDocument();
     }
 
     @Test
@@ -86,7 +86,7 @@ public class ProcessHandlerTest {
 
         processHandlerSpy.addImage(corruptedImage);
 
-        verify(processHandlerSpy, times(0)).saveFile();
+        verify(processHandlerSpy, times(0)).saveDocument();
     }
 
     @Test

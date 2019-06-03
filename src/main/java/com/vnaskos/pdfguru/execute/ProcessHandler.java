@@ -77,20 +77,24 @@ public class ProcessHandler implements ExecutionControlListener {
             progressListeners.forEach(ExecutionProgressListener::incrementProgress);
 
             if (outputParameters.isMultipleFileOutput()) {
-                saveFile();
+                saveDocument();
                 newDoc = new PDDocument();
             }
         }
 
         if (outputParameters.isSingleFileOutput()) {
-            saveFile();
+            saveDocument();
         }
 
         cleanup();
         progressListeners.forEach(ExecutionProgressListener::finish);
     }
 
-    void saveFile() throws IOException, COSVisitorException {
+    void addPage(PDPage page) throws IOException {
+        newDoc.importPage(page);
+    }
+
+    void saveDocument() throws IOException, COSVisitorException {
         String name = getOutputName(outputParameters.getOutputFile(), fileIndex++);
         newDoc.save(name);
         newDoc.close();
@@ -274,10 +278,6 @@ public class ProcessHandler implements ExecutionControlListener {
         document.addPage(page);
 
         return page;
-    }
-
-    void addPage(PDPage page) throws IOException {
-        newDoc.importPage(page);
     }
 
     @Override
