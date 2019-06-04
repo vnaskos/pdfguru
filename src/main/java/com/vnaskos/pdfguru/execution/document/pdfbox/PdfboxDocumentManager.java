@@ -4,7 +4,6 @@ import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
 import com.vnaskos.pdfguru.execution.document.DocumentManager;
 import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
-import com.vnaskos.pdfguru.execution.util.FileNamer;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -14,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PdfboxDocumentManager implements DocumentManager, DocumentControlListener<PDDocument, PDPage> {
-
-    private final FileNamer fileNamer = new FileNamer();
 
     private final List<ExecutionProgressListener> progressListeners = new ArrayList<>();
     private final List<PDDocument> pdfSourcesNotToBeGCd = new ArrayList<>();
@@ -45,8 +42,7 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
 
     @Override
     public void saveDocument(String path) throws IOException {
-        String uniqueFilePath = fileNamer.createUniqueOutputFileName(path);
-        outputDocument.save(uniqueFilePath);
+        outputDocument.save(path);
         closeDocument();
     }
 

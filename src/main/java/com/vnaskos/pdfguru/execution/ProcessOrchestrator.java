@@ -44,7 +44,7 @@ public class ProcessOrchestrator implements ExecutionControlListener {
         foreachInputItem(inputItem -> {
             documentManager.openNewDocument();
             documentManager.addInputItem(inputItem, outputParameters.getCompression());
-            documentManager.saveDocument(outputParameters.getOutputFile());
+            documentManager.saveDocument(outputParameters.getUniqueOutputFileName());
         });
     }
 
@@ -55,7 +55,7 @@ public class ProcessOrchestrator implements ExecutionControlListener {
                 documentManager.addInputItem(inputItem, outputParameters.getCompression()));
 
         if (!stopRequested) {
-            documentManager.saveDocument(outputParameters.getOutputFile());
+            documentManager.saveDocument(outputParameters.getUniqueOutputFileName());
         }
     }
 
