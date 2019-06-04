@@ -1,5 +1,6 @@
 package com.vnaskos.pdfguru.execution;
 
+import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.util.FileNamer;
 import com.vnaskos.pdfguru.execution.util.PagePatternTranslator;
 import com.vnaskos.pdfguru.input.items.InputItem;
@@ -18,7 +19,7 @@ import java.util.List;
 
 import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 
-public class PdfboxDocumentManager implements DocumentManager {
+public class PdfboxDocumentManager implements DocumentManager, DocumentControlListener<PDDocument, PDPage> {
 
     private FileNamer fileNamer = new FileNamer();
 
@@ -28,7 +29,8 @@ public class PdfboxDocumentManager implements DocumentManager {
 
     @Override
     public void openNewDocument() {
-        newDoc = createNewDocument();    }
+        newDoc = createNewDocument();
+    }
 
     PDDocument createNewDocument() {
         return new PDDocument();
@@ -37,13 +39,13 @@ public class PdfboxDocumentManager implements DocumentManager {
     @Override
     public void saveDocument(String path) throws IOException {
         String filepath = fileNamer.createUniqueOutputFileName(path);
-        newDoc.save(filepath);
+        getOutputDocument().save(filepath);
         closeDocument();
     }
 
     @Override
     public void closeDocument() throws IOException {
-        newDoc.close();
+        getOutputDocument().close();
         for (PDDocument openSourcePdf : pdfSourcesNotToBeGCd) {
             openSourcePdf.close();
         }
@@ -53,10 +55,14 @@ public class PdfboxDocumentManager implements DocumentManager {
     @Override
     public void addInputItem(InputItem inputItem, float compression) {
         progressListeners.forEach(l -> l.updateStatus(inputItem.getPath()));
-        if (inputItem.isPdf()) {
-            addPDF(inputItem);
-        } else {
-            addImage(inputItem, compression);
+        try {
+            if (inputItem.isPdf()) {
+                addPDF(inputItem);
+            } else {
+                addImage(inputItem, compression);
+            }
+        } catch (ExcecutionException e) {
+            progressListeners.forEach(l -> l.updateStatus(e.getMessage()));
         }
         progressListeners.forEach(ExecutionProgressListener::incrementProgress);
     }
@@ -70,14 +76,14 @@ public class PdfboxDocumentManager implements DocumentManager {
         progressListeners.add(listener);
     }
 
-    private void addPDF(InputItem file) {
+    private void addPDF(InputItem file) throws ExcecutionException {
         try {
             PDDocument sourcePdf = readDocument(file.getPath());
             importSelectedPages(sourcePdf, file.getPages());
         } catch (InvalidPasswordException ex) {
-            progressListeners.forEach(l -> l.updateStatus("[E02] - skip encrypted! " + file.getPath()));
+            throw new ExcecutionException("[E02] - skip encrypted! " + file.getPath());
         } catch (IOException ex) {
-            progressListeners.forEach(l -> l.updateStatus("[E01] - can't process " + file.getPath()));
+            throw new ExcecutionException("[E01] - can't process " + file.getPath());
         }
     }
 
@@ -96,27 +102,33 @@ public class PdfboxDocumentManager implements DocumentManager {
         }
     }
 
-    private void addImage(InputItem file, float compression) {
+    private void addImage(InputItem file, float compression) throws ExcecutionException {
         try {
             BufferedImage image = ImageIO.read(new File(file.getPath()));
             drawImageOnNewBlankPage(image, compression);
         } catch (IOException ex) {
-            progressListeners.forEach(l -> l.updateStatus("[E03] - can't process image " + file.getPath()));
+            throw new ExcecutionException("[E03] - can't process image " + file.getPath());
         }
     }
 
     private void drawImageOnNewBlankPage(BufferedImage image, float compression) throws IOException {
         PDPage page = new PDPage(new PDRectangle(image.getWidth(), image.getHeight()));
-        PDImageXObject pdImage = JPEGFactory.createFromImage(newDoc, image, compression);
+        PDImageXObject pdImage = JPEGFactory.createFromImage(getOutputDocument(), image, compression);
 
-        try (PDPageContentStream contentStream = new PDPageContentStream(newDoc, page, APPEND, true, true)) {
+        try (PDPageContentStream contentStream = new PDPageContentStream(getOutputDocument(), page, APPEND, true, true)) {
             contentStream.drawImage(pdImage, 0, 0, pdImage.getWidth(), pdImage.getHeight());
         }
 
         addPage(page);
     }
 
-    void addPage(PDPage page) throws IOException {
-        newDoc.importPage(page);
+    @Override
+    public PDDocument getOutputDocument() {
+        return newDoc;
+    }
+
+    @Override
+    public void addPage(PDPage page) throws IOException {
+        getOutputDocument().importPage(page);
     }
 }
