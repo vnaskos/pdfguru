@@ -1,299 +1,65 @@
 package com.vnaskos.pdfguru.execute;
 
-import com.vnaskos.pdfguru.OutputDialog;
-import com.vnaskos.pdfguru.PDFGuru;
 import com.vnaskos.pdfguru.input.items.InputItem;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
-import org.apache.pdfbox.exceptions.COSVisitorException;
-import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.edit.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDJpeg;
-import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
 
 /**
  *
  * @author Vasilis Naskos
  */
-public class ProcessHandler {
-    
-    private final List<InputItem> files;
-    private final boolean separateFiles;
-    private final float compression;
-    private final String outputFile;
-    private PDDocument newDoc;
-    private int fileIndex;
-    private OutputDialog progress;
-    private PDDocument originialPdfDoc;
-    private List<PDPage> pages;
+public class ProcessHandler implements ExecutionControlListener {
 
-    public ProcessHandler(List<InputItem> files, OutputParameters params) {
-        this.files = files;
-        this.compression = params.getCompression();
-        this.outputFile = params.getOutputFile();
-        this.separateFiles = params.isSeparateFiles();
-        
-        newDoc = new PDDocument();
-        fileIndex = 1;
+    private boolean stopRequested = false;
+
+    private final DocumentManager documentManager;
+    private final List<InputItem> inputItems;
+    private final OutputParameters outputParameters;
+    private FileNamer fileNamer;
+
+    public ProcessHandler(DocumentManager documentManager, List<InputItem> inputItems, OutputParameters outputParameters) {
+        this.documentManager = documentManager;
+        this.inputItems = inputItems;
+        this.outputParameters = outputParameters;
+
+        this.setFileNamer(new FileNamer());
     }
 
-    private void tryToStartProcess() {
-        try {
-            startProcess();
-        } catch (IOException ex) {
-            Logger.getLogger(ProcessHandler.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (COSVisitorException ex) {
-            Logger.getLogger(ProcessHandler.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    void setFileNamer(FileNamer fileNamer) {
+        this.fileNamer = fileNamer;
     }
     
-    private void startProcess() throws IOException, COSVisitorException {
-        progress = new OutputDialog();
-        progress.setVisible(true);
-        progress.setProgressMax(files.size());
-        
-        for (int i=0; i<files.size(); i++) {
-            InputItem file = files.get(i);
-            
-            if (!progress.isVisible()) {
+    public void startProcess() throws IOException {
+        documentManager.openNewDocument();
+
+        for (InputItem inputItem : inputItems) {
+            if (stopRequested) {
                 return;
             }
-            
-            progress.updateLog(file.getPath());
-            if (isPDF(file)) {
-                addPDF(file);
-            } else {
-                addImage(file);
-            }
-            progress.updateProgress(i + 1);
-        }
-        
-        saveAndCleanUp();
-        progress.updateLog("Completed!");
-    }
-    
-    private void saveAndCleanUp() throws IOException, COSVisitorException {
-        if (!separateFiles) {
-            saveFile();
-        }
-        
-        newDoc.close();
-        
-        if (originialPdfDoc != null) {
-            originialPdfDoc.close();
-        }
-    }
-    
-    private void addPDF(InputItem file)
-            throws FileNotFoundException, IOException, COSVisitorException {
-        if (isFileEncrypted(file.getPath())) {
-            progress.updateLog("Skip! " + file + " is encrypted");
-            return;
-        }
-        
-        originialPdfDoc = PDDocument.load(file.getPath());
-        PDDocumentCatalog cat = originialPdfDoc.getDocumentCatalog();
-        pages = cat.getAllPages();
-        String pagesField = file.getPages();
-        
-        if (pagesField.isEmpty()) {
-            addAllPDFPages();
-        } else {
-            addSelectedPDFPages(pagesField);
-        }
-    }
-    
-    private void addAllPDFPages()
-            throws IOException, COSVisitorException {
-        for (PDPage p : pages) {
-            newDoc.importPage(p);
-        }
-        if (separateFiles) {
-            saveFile();
-        }
-    }
-    
-    private void addSelectedPDFPages(String pagesField)
-            throws IOException, COSVisitorException {
-        pagesField = pagesField.replaceAll("\\$", pages.size() + "");
-        String[] groups = pagesField.split("\\|");
-        for (String g : groups) {
-            createGroups(g);
-            if (separateFiles) {
-                saveFile();
+
+            documentManager.addInputItem(inputItem, outputParameters.getCompression());
+
+            if (outputParameters.isMultipleFileOutput()) {
+                saveDocument();
+                documentManager.openNewDocument();
             }
         }
-    }
-    
-    private void createGroups(String g) throws IOException {
-        String[] subGroups = g.split(",");
-        for (String sub : subGroups) {
-            if (sub.contains("-")) {
-                addPagesWithInterval(sub);
-            } else {
-                int p = Integer.parseInt(sub);
-                newDoc.importPage(pages.get(p - 1));
-            }
-        }
-    }
-    
-    private void addPagesWithInterval(String sub) throws IOException {
-        String[] lim = sub.split("-");
-        int lim0 = Integer.parseInt(lim[0]);
-        int lim1 = Integer.parseInt(lim[1]);
-        if (lim0 < lim1) {
-            for (int j = lim0; j <= lim1; j++) {
-                newDoc.importPage(pages.get(j - 1));
-            }
-        } else {
-            for (int j = lim0; j >= lim1; j--) {
-                newDoc.importPage(pages.get(j - 1));
-            }
-        }
-    }
-    
-    private void addImage(InputItem file)
-            throws IOException, COSVisitorException {
-        BufferedImage image = loadImage(file.getPath());
-        
-        if (image != null) {
-            int width = image.getWidth();
-            int height = image.getHeight();
-            PDRectangle rect = new PDRectangle(width, height);
-            PDPage page = new PDPage(rect);
-            
-            newDoc.addPage(page);
-            
-            PDXObjectImage ximage = new PDJpeg(newDoc, image, compression);
-            PDPageContentStream content = new PDPageContentStream(newDoc, page);
-            content.drawImage(ximage, 0, 0);
-            content.close();
+
+        if (outputParameters.isSingleFileOutput()) {
+            saveDocument();
         }
 
-        if (separateFiles) {
-            saveFile();
-        }
-    }
-    
-    private void saveFile() throws IOException, COSVisitorException {
-        String name = getOutputName(outputFile, fileIndex++);
-        newDoc.save(name);
-        newDoc = new PDDocument();
-    }
-    
-    private String getOutputName(String name, int o) {
-        String out;
-        
-        if(name.toLowerCase().endsWith(".pdf")) {
-            out = name.substring(0, name.length()-4);
-        } else {
-            out = name;
-        }
-        
-        String testOut = out + "_" + o + ".pdf";
-        while((new File(testOut)).exists()) {
-            o++;
-            testOut = out + "_" + o + ".pdf";
-        }
-        
-        return testOut;
-    }
-    
-    private boolean isPDF(InputItem item) {
-        String file = item.getPath().toLowerCase();
-        
-        return file.endsWith(".pdf");
-    }
-    
-    byte[] getImageAsByteArray(String file) throws IOException, COSVisitorException {
-        PDDocument doc = new PDDocument();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        BufferedImage bufferedImage = loadImage(file);
-
-        PDPage page = new PDPage(new PDRectangle(bufferedImage.getWidth(), bufferedImage.getHeight()));
-        doc.importPage(page);
-
-        PDXObjectImage ximage = new PDJpeg(doc, bufferedImage, compression);
-
-        PDPageContentStream content = new PDPageContentStream(doc, page);
-
-        content.drawImage(ximage, 0, 0);
-        content.close();
-
-        doc.save(baos);
-        doc.close();
-
-        return baos.toByteArray();
-    }
-    
-    private BufferedImage loadImage(String file) throws IOException {
-        BufferedImage bufferedImage = null;
-
-        try {
-            bufferedImage = Sanselan.getBufferedImage(new File(file));
-        } catch (ImageReadException ex) {
-            bufferedImage = ImageIO.read(new File(file));
-        }
-
-        return bufferedImage;
-    }
-    
-    public void execute() {
-        Runnable task = new Runnable() {
-
-            @Override
-            public void run() {
-                tryToStartProcess();
-            }
-        };
-
-        Thread t1 = new Thread(task);
-        t1.start();
-    };
-    
-    private boolean isFileEncrypted(String file) {
-        try {
-            return isEncrypted(file);
-        } catch (IOException ex) {
-            Logger.getLogger(PDFGuru.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return true;
+        documentManager.notifyFinish();
     }
 
-    private boolean isEncrypted(String file) throws IOException {
-        File originalPDF = new File(file);
-        FileInputStream fis = new FileInputStream(originalPDF);
-//        BufferedInputStream bis = new BufferedInputStream(fis);
-        PDFParser parser = new PDFParser(fis);
-        parser.parse();
-
-        PDDocument pdfDoc = parser.getPDDocument();
-
-        boolean isOriginalDocEncrypted = pdfDoc.isEncrypted();
-        pdfDoc.close();
-        parser.clearResources();
-//        if (isOriginalDocEncrypted) {
-//            originialPdfDoc.openProtection(new StandardDecryptionMaterial("password"));
-//        }
-
-        fis.close();
-        return isOriginalDocEncrypted;
+    private void saveDocument() throws IOException {
+        String name = fileNamer.createUniqueOutputFileName(outputParameters.getOutputFile());
+        documentManager.saveDocument(name);
     }
-    
+
+    @Override
+    public void requestStop() {
+        this.stopRequested = true;
+    }
 }

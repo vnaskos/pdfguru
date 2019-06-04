@@ -5,51 +5,46 @@ package com.vnaskos.pdfguru.execute;
  * @author Vasilis Naskos
  */
 public class OutputParameters {
-    
-    private final float compression;
-    private final String outputFile;
-    private final boolean separateFiles;
 
-    private OutputParameters(Builder b) {
-        this.compression = b.compression;
-        this.outputFile = b.outputFile;
-        this.separateFiles = b.separateFiles;
-    }
-    
-    public float getCompression() {
-        return compression;
+    static final float COMPRESSED_MAX = 0.0f;
+    static final float UNCOMPRESSED_MAX = 1.0f;
+
+    private final String outputFile;
+
+    private float compression = 0.5f;
+    private boolean singleFileOutput = true;
+
+    public OutputParameters(String outputFile) {
+        this.outputFile = outputFile;
     }
 
     public String getOutputFile() {
         return outputFile;
     }
 
-    public boolean isSeparateFiles() {
-        return separateFiles;
+    public float getCompression() {
+        return compression;
     }
-    
-    public static class Builder {
-        private float compression;
-        private String outputFile;
-        private boolean separateFiles;
-        
-        public Builder compression(float comp) {
-            this.compression = comp;
-            return this;
+
+    public void setCompression(float compression) {
+        if (compression < 0.0f) {
+            this.compression = COMPRESSED_MAX;
+        } else if (compression > 1.0f) {
+            this.compression = UNCOMPRESSED_MAX;
+        } else {
+            this.compression = compression;
         }
-        
-        public Builder outputFile(String out) {
-            this.outputFile = out;
-            return this;
-        }
-        
-        public Builder separateFiles(boolean sep) {
-            this.separateFiles = sep;
-            return this;
-        }
-        
-        public OutputParameters build() {
-            return new OutputParameters(this);
-        }
+    }
+
+    public void setMultiFileOutput() {
+        this.singleFileOutput = false;
+    }
+
+    public boolean isSingleFileOutput() {
+        return singleFileOutput;
+    }
+
+    public boolean isMultipleFileOutput() {
+        return !singleFileOutput;
     }
 }
