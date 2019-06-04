@@ -87,15 +87,12 @@ public class PdfboxDocumentManager implements DocumentManager {
             return;
         }
 
-        originalPdfDoc = new PDDocument();
-        PDPage page = addBlankPage(originalPdfDoc, image.getWidth(), image.getHeight());
-        PDImageXObject pdImage = JPEGFactory.createFromImage(originalPdfDoc, image, compression);
+        PDPage page = addBlankPage(newDoc, image.getWidth(), image.getHeight());
+        PDImageXObject pdImage = JPEGFactory.createFromImage(newDoc, image, compression);
 
-        try (PDPageContentStream contentStream = new PDPageContentStream(originalPdfDoc, page, APPEND, true, true)) {
+        try (PDPageContentStream contentStream = new PDPageContentStream(newDoc, page, APPEND, true, true)) {
             contentStream.drawImage(pdImage, 0, 0, pdImage.getWidth(), pdImage.getHeight());
         }
-
-        addPage(page);
     }
 
     private BufferedImage loadImage(String file) {

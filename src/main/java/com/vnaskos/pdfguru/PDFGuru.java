@@ -1,6 +1,5 @@
 package com.vnaskos.pdfguru;
 
-import com.vnaskos.pdfguru.execute.DocumentManager;
 import com.vnaskos.pdfguru.execute.OutputParameters;
 import com.vnaskos.pdfguru.execute.PdfboxDocumentManager;
 import com.vnaskos.pdfguru.execute.ProcessHandler;
@@ -8,17 +7,16 @@ import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
+
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.swing.DefaultListModel;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 /**
  *
