@@ -34,7 +34,9 @@ public class PdfboxDocumentManager implements DocumentManager {
 
     @Override
     public void saveDocument(String path) throws IOException {
-        newDoc.save(path);
+        FileNamer fileNamer = new FileNamer();
+        String filepath = fileNamer.createUniqueOutputFileName(path);
+        newDoc.save(filepath);
         closeDocument();
     }
 

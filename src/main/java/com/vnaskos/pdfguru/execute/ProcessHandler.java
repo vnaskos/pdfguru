@@ -16,18 +16,11 @@ public class ProcessHandler implements ExecutionControlListener {
     private final DocumentManager documentManager;
     private final List<InputItem> inputItems;
     private final OutputParameters outputParameters;
-    private FileNamer fileNamer;
 
     public ProcessHandler(DocumentManager documentManager, List<InputItem> inputItems, OutputParameters outputParameters) {
         this.documentManager = documentManager;
         this.inputItems = inputItems;
         this.outputParameters = outputParameters;
-
-        this.setFileNamer(new FileNamer());
-    }
-
-    void setFileNamer(FileNamer fileNamer) {
-        this.fileNamer = fileNamer;
     }
     
     public void startProcess() throws IOException {
@@ -41,21 +34,16 @@ public class ProcessHandler implements ExecutionControlListener {
             documentManager.addInputItem(inputItem, outputParameters.getCompression());
 
             if (outputParameters.isMultipleFileOutput()) {
-                saveDocument();
+                documentManager.saveDocument(outputParameters.getOutputFile());
                 documentManager.openNewDocument();
             }
         }
 
         if (outputParameters.isSingleFileOutput()) {
-            saveDocument();
+            documentManager.saveDocument(outputParameters.getOutputFile());
         }
 
         documentManager.notifyFinish();
-    }
-
-    private void saveDocument() throws IOException {
-        String name = fileNamer.createUniqueOutputFileName(outputParameters.getOutputFile());
-        documentManager.saveDocument(name);
     }
 
     @Override
