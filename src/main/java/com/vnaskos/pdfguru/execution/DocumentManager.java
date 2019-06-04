@@ -12,6 +12,6 @@ public interface DocumentManager extends Finishable {
 
     void closeDocument() throws IOException;
 
-    void addInputItem(InputItem inputItem, float compression) throws IOException;
+    void addInputItem(InputItem inputItem, float compression);
 
 }

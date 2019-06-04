@@ -50,7 +50,7 @@ public class PdfboxDocumentManager implements DocumentManager {
     }
 
     @Override
-    public void addInputItem(InputItem inputItem, float compression) throws IOException {
+    public void addInputItem(InputItem inputItem, float compression) {
         progressListeners.forEach(l -> l.updateStatus(inputItem.getPath()));
         if (inputItem.isPdf()) {
             addPDF(inputItem);
@@ -69,22 +69,28 @@ public class PdfboxDocumentManager implements DocumentManager {
         progressListeners.add(listener);
     }
 
-    private void addPDF(InputItem file)
-            throws IOException {
-        PDDocument sourcePdf;
+    private void addPDF(InputItem file) {
         try {
-            sourcePdf = PDDocument.load(new File(file.getPath()));
+            PDDocument sourcePdf = readDocument(file.getPath());
+            importSelectedPages(sourcePdf, file.getPages());
         } catch (InvalidPasswordException ex) {
-            progressListeners.forEach(l -> l.updateStatus("Skip encrypted! %s" + file));
-            return;
+            progressListeners.forEach(l -> l.updateStatus("[E02] - skip encrypted! " + file.getPath()));
+        } catch (IOException ex) {
+            progressListeners.forEach(l -> l.updateStatus("[E01] - can't process " + file.getPath()));
         }
-        pdfSourcesNotToBeGCd.add(sourcePdf);
+    }
 
+    private PDDocument readDocument(String filePath) throws IOException {
+        PDDocument sourcePdf = PDDocument.load(new File(filePath));
+        pdfSourcesNotToBeGCd.add(sourcePdf);
+        return sourcePdf;
+    }
+
+    private void importSelectedPages(PDDocument sourcePdf, String selectedPagesPattern) throws IOException {
         PDDocumentCatalog cat = sourcePdf.getDocumentCatalog();
         PDPageTree pages = cat.getPages();
-        String pagesPattern = file.getPages();
 
-        for (int page : PagePatternTranslator.getSelectedIndicesFor(pagesPattern, sourcePdf.getNumberOfPages())) {
+        for (int page : PagePatternTranslator.getSelectedIndicesFor(selectedPagesPattern, sourcePdf.getNumberOfPages())) {
             addPage(pages.get(page-1));
         }
     }
@@ -94,7 +100,7 @@ public class PdfboxDocumentManager implements DocumentManager {
             BufferedImage image = ImageIO.read(new File(file.getPath()));
             drawImageOnNewBlankPage(image, compression);
         } catch (IOException ex) {
-            progressListeners.forEach(l -> l.updateStatus("[E01] - error skip image %s" + file));
+            progressListeners.forEach(l -> l.updateStatus("[E03] - can't process image " + file.getPath()));
         }
     }
 

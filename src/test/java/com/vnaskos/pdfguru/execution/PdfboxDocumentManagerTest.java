@@ -74,7 +74,7 @@ public class PdfboxDocumentManagerTest {
     }
 
     @Test
-    public void addImageThatIsUnableToLoadShouldContinueProcessWithoutAddingAnyPage() throws IOException {
+    public void addImageUnableToLoadShouldContinueProcessWithoutAddingAnyPage() {
         PDDocument docSpy = spy(PDDocument.class);
         PdfboxDocumentManager managerSpyWithRealDoc = spy(PdfboxDocumentManager.class);
         doReturn(docSpy).when(managerSpyWithRealDoc).createNewDocument();
@@ -85,6 +85,15 @@ public class PdfboxDocumentManagerTest {
         managerSpyWithRealDoc.addInputItem(nonExistingImage, ANY_COMPRESSION);
 
         assertThat(docSpy.getNumberOfPages()).isEqualTo(0);
+    }
+
+    @Test
+    public void addPdfUnableToLoadShouldContinueProcessWithoutAddingAnyPage() throws IOException {
+        InputItem nonExistingPdf = new InputItem("/NON-EXISTING/PDF.pdf");
+
+        managerSpy.addInputItem(nonExistingPdf, ANY_COMPRESSION);
+
+        verify(managerSpy, never()).addPage(any());
     }
 
     @Test
