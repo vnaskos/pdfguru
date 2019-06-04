@@ -58,7 +58,7 @@ public class PDFGuru extends javax.swing.JFrame {
             public void warn() {
                 try {
                     InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-                    item.setPages(jTextField1.getText());
+                    item.setPagesPattern(jTextField1.getText());
                 } catch(Exception e) {
                     
                 }
@@ -361,7 +361,7 @@ public class PDFGuru extends javax.swing.JFrame {
     private void inputListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_inputListValueChanged
         try {
             InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-            jTextField1.setText(item.getPages());
+            jTextField1.setText(item.getPagesPattern());
         } catch(Exception e) {
             
         }

@@ -3,7 +3,6 @@ package com.vnaskos.pdfguru.execution.document.pdfbox;
 import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
 import com.vnaskos.pdfguru.execution.document.GenericDocumentImporter;
-import com.vnaskos.pdfguru.execution.util.PagePatternTranslator;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -13,6 +12,7 @@ import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 class PdfboxPdfImporter extends GenericDocumentImporter<PDDocument, PDPage> {
 
@@ -24,7 +24,7 @@ class PdfboxPdfImporter extends GenericDocumentImporter<PDDocument, PDPage> {
     public void addInputItem(InputItem inputItem, float compression) throws ExcecutionException {
         try {
             PDDocument sourcePdf = readDocument(inputItem.getPath());
-            importSelectedPages(sourcePdf, inputItem.getPages());
+            importSelectedPages(sourcePdf, inputItem.getSelectedPages(sourcePdf.getNumberOfPages()));
         } catch (InvalidPasswordException ex) {
             throw new ExcecutionException("[E02] - skip encrypted! " + inputItem.getPath());
         } catch (IOException ex) {
@@ -38,11 +38,11 @@ class PdfboxPdfImporter extends GenericDocumentImporter<PDDocument, PDPage> {
         return sourcePdf;
     }
 
-    private void importSelectedPages(PDDocument sourcePdf, String selectedPagesPattern) throws IOException {
+    private void importSelectedPages(PDDocument sourcePdf, List<Integer> selectedPages) throws IOException {
         PDDocumentCatalog cat = sourcePdf.getDocumentCatalog();
         PDPageTree pages = cat.getPages();
 
-        for (int page : PagePatternTranslator.getSelectedIndicesFor(selectedPagesPattern, sourcePdf.getNumberOfPages())) {
+        for (int page : selectedPages) {
             documentControlListener.addPage(pages.get(page-1));
         }
     }
