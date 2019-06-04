@@ -5,8 +5,6 @@ import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import org.apache.sanselan.ImageReadException;
-import org.apache.sanselan.Sanselan;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -14,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 
@@ -23,7 +20,7 @@ public class PdfboxDocumentManager implements DocumentManager {
     private List<ExecutionProgressListener> progressListeners = new ArrayList<>();
     private PDDocument newDoc;
 
-    private PDDocument originalPdfDoc;
+    private final ArrayList<PDDocument> pdfSourcesNotToBeGCd = new ArrayList<>();
 
     @Override
     public void openNewDocument() {
@@ -39,6 +36,10 @@ public class PdfboxDocumentManager implements DocumentManager {
     @Override
     public void closeDocument() throws IOException {
         newDoc.close();
+        for (PDDocument openSourcePdf : pdfSourcesNotToBeGCd) {
+            openSourcePdf.close();
+        }
+        pdfSourcesNotToBeGCd.clear();
     }
 
     @Override
@@ -63,19 +64,20 @@ public class PdfboxDocumentManager implements DocumentManager {
 
     private void addPDF(InputItem file)
             throws IOException {
-        originalPdfDoc = PDDocument.load(new File(file.getPath()));
+        PDDocument sourcePdf = PDDocument.load(new File(file.getPath()));
+        pdfSourcesNotToBeGCd.add(sourcePdf);
 
-        if (originalPdfDoc.isEncrypted()) {
-            originalPdfDoc.close();
+        if (sourcePdf.isEncrypted()) {
+            sourcePdf.close();
             progressListeners.forEach(l -> l.updateStatus("Skip encrypted! %s" + file));
             return;
         }
 
-        PDDocumentCatalog cat = originalPdfDoc.getDocumentCatalog();
+        PDDocumentCatalog cat = sourcePdf.getDocumentCatalog();
         PDPageTree pages = cat.getPages();
         String pagesPattern = file.getPages();
 
-        for (int page : PagePatternTranslator.getSelectedIndicesFor(pagesPattern, originalPdfDoc.getNumberOfPages())) {
+        for (int page : PagePatternTranslator.getSelectedIndicesFor(pagesPattern, sourcePdf.getNumberOfPages())) {
             addPage(pages.get(page-1));
         }
     }
@@ -96,17 +98,12 @@ public class PdfboxDocumentManager implements DocumentManager {
     }
 
     private BufferedImage loadImage(String file) {
-        BufferedImage bufferedImage;
+        BufferedImage bufferedImage = null;
 
         try {
-            bufferedImage = Sanselan.getBufferedImage(new File(file));
-        } catch (IOException | ImageReadException ex) {
-            try {
-                bufferedImage = ImageIO.read(new File(file));
-            } catch (IOException e) {
-                // log: skip image, could not be loaded
-                return null;
-            }
+            bufferedImage = ImageIO.read(new File(file));
+        } catch (IOException e) {
+            progressListeners.forEach(l -> l.updateStatus("Skip, couldn't load image! %s" + file));
         }
 
         return bufferedImage;

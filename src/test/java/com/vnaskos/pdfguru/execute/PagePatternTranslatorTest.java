@@ -1,11 +1,7 @@
 package com.vnaskos.pdfguru.execute;
 
-import com.vnaskos.pdfguru.input.items.InputItem;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,9 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class PagePatternTranslatorTest {
 
     private static final int LAST_PAGE = 5;
-
-    private static final List<InputItem> SAMPLE_5_PAGES_PDF = input("src/test/resources/5pages.pdf");
-    private static final List<InputItem> SAMPLE_128x128_IMG = input("src/test/resources/img128x128.jpg");
 
     @Test
     public void selectOnePageShouldReturnThatPageIndex() {
@@ -72,16 +65,6 @@ public class PagePatternTranslatorTest {
         List<Integer> selectedPages = PagePatternTranslator.getSelectedIndicesFor(allPages, lastPage);
 
         assertThat(selectedPages).containsExactly(1,2,3,4,5);
-    }
-
-    private static List<InputItem> input(String... localFilePaths) {
-        List<InputItem> inputFiles = new ArrayList<>();
-        Arrays.stream(localFilePaths).forEach((filepath) -> {
-            File inputImage = new File(filepath);
-            InputItem imageItem = new InputItem(inputImage.getAbsolutePath());
-            inputFiles.add(imageItem);
-        });
-        return inputFiles;
     }
 
 }
