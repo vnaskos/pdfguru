@@ -6,6 +6,9 @@ package com.vnaskos.pdfguru.execute;
  */
 public class OutputParameters {
 
+    static final float COMPRESSED_MAX = 0.0f;
+    static final float UNCOMPRESSED_MAX = 1.0f;
+
     private final String outputFile;
 
     private float compression = 0.5f;
@@ -24,7 +27,13 @@ public class OutputParameters {
     }
 
     public void setCompression(float compression) {
-        this.compression = compression;
+        if (compression < 0.0f) {
+            this.compression = COMPRESSED_MAX;
+        } else if (compression > 1.0f) {
+            this.compression = UNCOMPRESSED_MAX;
+        } else {
+            this.compression = compression;
+        }
     }
 
     public void setMultiFileOutput() {
