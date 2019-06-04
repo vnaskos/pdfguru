@@ -2,7 +2,7 @@ package com.vnaskos.pdfguru;
 
 import com.vnaskos.pdfguru.execute.OutputParameters;
 import com.vnaskos.pdfguru.execute.PdfboxDocumentManager;
-import com.vnaskos.pdfguru.execute.ProcessHandler;
+import com.vnaskos.pdfguru.execute.ProcessOrchestrator;
 import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
@@ -343,7 +343,7 @@ public class PDFGuru extends javax.swing.JFrame {
         }
 
         PdfboxDocumentManager documentManager = new PdfboxDocumentManager();
-        ProcessHandler handler = new ProcessHandler(documentManager, files, params);
+        ProcessOrchestrator handler = new ProcessOrchestrator(documentManager, files, params);
         OutputDialog outputDialog = new OutputDialog(files.size(), handler);
         outputDialog.setVisible(true);
         documentManager.registerProgressListener(outputDialog);
