@@ -98,7 +98,7 @@ public class PDFGuru extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("PDF Guru v0.2");
+        setTitle("PDF Guru v0.3");
 
         inputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
