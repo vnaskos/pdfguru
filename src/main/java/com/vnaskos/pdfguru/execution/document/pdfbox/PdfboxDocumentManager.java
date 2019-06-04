@@ -3,7 +3,7 @@ package com.vnaskos.pdfguru.execution.document.pdfbox;
 import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
 import com.vnaskos.pdfguru.execution.document.DocumentManager;
-import com.vnaskos.pdfguru.execution.ExecutionProgressListener;
+import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
 import com.vnaskos.pdfguru.execution.util.FileNamer;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -23,7 +23,7 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
     private final PdfboxImageImporter imageImporter;
     private final PdfboxPdfImporter pdfImporter;
 
-    private PDDocument newDoc;
+    private PDDocument outputDocument;
 
     public PdfboxDocumentManager() {
         imageImporter = new PdfboxImageImporter(this);
@@ -40,19 +40,19 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
 
     @Override
     public void openNewDocument() {
-        newDoc = createNewDocument();
+        outputDocument = createNewDocument();
     }
 
     @Override
     public void saveDocument(String path) throws IOException {
-        String filepath = fileNamer.createUniqueOutputFileName(path);
-        getOutputDocument().save(filepath);
+        String uniqueFilePath = fileNamer.createUniqueOutputFileName(path);
+        outputDocument.save(uniqueFilePath);
         closeDocument();
     }
 
     @Override
     public void closeDocument() throws IOException {
-        getOutputDocument().close();
+        outputDocument.close();
         for (PDDocument openSourcePdf : pdfSourcesNotToBeGCd) {
             openSourcePdf.close();
         }
@@ -81,12 +81,12 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
 
     @Override
     public PDDocument getOutputDocument() {
-        return newDoc;
+        return outputDocument;
     }
 
     @Override
     public void addPage(PDPage page) throws IOException {
-        getOutputDocument().importPage(page);
+        outputDocument.importPage(page);
     }
 
     @Override

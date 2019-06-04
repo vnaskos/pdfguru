@@ -1,6 +1,5 @@
 package com.vnaskos.pdfguru.execution.document;
 
-import com.vnaskos.pdfguru.execution.Finishable;
 import com.vnaskos.pdfguru.input.items.InputItem;
 
 import java.io.IOException;

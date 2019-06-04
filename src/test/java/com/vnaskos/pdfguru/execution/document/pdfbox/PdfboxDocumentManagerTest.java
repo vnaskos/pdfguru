@@ -1,6 +1,6 @@
 package com.vnaskos.pdfguru.execution.document.pdfbox;
 
-import com.vnaskos.pdfguru.execution.ExecutionProgressListener;
+import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

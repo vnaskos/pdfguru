@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execution;
+package com.vnaskos.pdfguru.execution.document;
 
 public interface Finishable {
 
