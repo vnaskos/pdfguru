@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execute;
+package com.vnaskos.pdfguru.execution;
 
 /**
  *
@@ -42,9 +42,5 @@ public class OutputParameters {
 
     public boolean isSingleFileOutput() {
         return singleFileOutput;
-    }
-
-    public boolean isMultipleFileOutput() {
-        return !singleFileOutput;
     }
 }

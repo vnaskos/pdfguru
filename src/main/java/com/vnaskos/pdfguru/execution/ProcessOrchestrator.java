@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execute;
+package com.vnaskos.pdfguru.execution;
 
 import com.vnaskos.pdfguru.input.items.InputItem;
 
@@ -30,10 +30,10 @@ public class ProcessOrchestrator implements ExecutionControlListener {
     }
     
     public void startProcess() throws IOException {
-        if (outputParameters.isMultipleFileOutput()) {
-            startMultiOutputProcess();
-        } else {
+        if (outputParameters.isSingleFileOutput()) {
             startSingleOutputProcess();
+        } else {
+            startMultiOutputProcess();
         }
 
         documentManager.notifyFinish();

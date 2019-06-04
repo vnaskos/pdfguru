@@ -1,7 +1,7 @@
 package com.vnaskos.pdfguru;
 
-import com.vnaskos.pdfguru.execute.ExecutionControlListener;
-import com.vnaskos.pdfguru.execute.ExecutionProgressListener;
+import com.vnaskos.pdfguru.execution.ExecutionControlListener;
+import com.vnaskos.pdfguru.execution.ExecutionProgressListener;
 
 import javax.swing.SwingUtilities;
 

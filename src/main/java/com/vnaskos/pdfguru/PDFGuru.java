@@ -1,8 +1,8 @@
 package com.vnaskos.pdfguru;
 
-import com.vnaskos.pdfguru.execute.OutputParameters;
-import com.vnaskos.pdfguru.execute.PdfboxDocumentManager;
-import com.vnaskos.pdfguru.execute.ProcessOrchestrator;
+import com.vnaskos.pdfguru.execution.OutputParameters;
+import com.vnaskos.pdfguru.execution.PdfboxDocumentManager;
+import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
 import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
