@@ -2,8 +2,10 @@ package com.vnaskos.pdfguru.execution;
 
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,8 +65,12 @@ public class PdfboxDocumentManagerTest {
 
         managerSpyWithRealDoc.addInputItem(SAMPLE_128x128_IMG, ANY_COMPRESSION);
 
-        verify(managerSpyWithRealDoc, times(1))
-                .addBlankPage(any(PDDocument.class), eq(128.0f), eq(128.0f));
+        ArgumentCaptor<PDPage> pageCaptor = ArgumentCaptor.forClass(PDPage.class);
+        verify(managerSpyWithRealDoc, times(1)).addPage(pageCaptor.capture());
+
+        PDPage imagePage = pageCaptor.getValue();
+        assertThat(imagePage.getMediaBox().getWidth()).isEqualTo(128.0f);
+        assertThat(imagePage.getMediaBox().getHeight()).isEqualTo(128.0f);
     }
 
     @Test

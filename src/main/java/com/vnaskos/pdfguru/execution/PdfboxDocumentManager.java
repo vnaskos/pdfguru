@@ -89,38 +89,24 @@ public class PdfboxDocumentManager implements DocumentManager {
         }
     }
 
-    private void addImage(InputItem file, float compression) throws IOException {
-        BufferedImage image = loadImage(file.getPath());
-
-        if (image == null) {
-            progressListeners.forEach(l -> l.updateStatus("Skip image %s" + file));
-            return;
+    private void addImage(InputItem file, float compression) {
+        try {
+            BufferedImage image = ImageIO.read(new File(file.getPath()));
+            drawImageOnNewBlankPage(image, compression);
+        } catch (IOException ex) {
+            progressListeners.forEach(l -> l.updateStatus("[E01] - error skip image %s" + file));
         }
+    }
 
-        PDPage page = addBlankPage(newDoc, image.getWidth(), image.getHeight());
+    private void drawImageOnNewBlankPage(BufferedImage image, float compression) throws IOException {
+        PDPage page = new PDPage(new PDRectangle(image.getWidth(), image.getHeight()));
         PDImageXObject pdImage = JPEGFactory.createFromImage(newDoc, image, compression);
 
         try (PDPageContentStream contentStream = new PDPageContentStream(newDoc, page, APPEND, true, true)) {
             contentStream.drawImage(pdImage, 0, 0, pdImage.getWidth(), pdImage.getHeight());
         }
-    }
 
-    private BufferedImage loadImage(String file) {
-        try {
-            return ImageIO.read(new File(file));
-        } catch (IOException e) {
-            progressListeners.forEach(l -> l.updateStatus("Unable to load image %s" + file));
-            return null;
-        }
-    }
-
-    PDPage addBlankPage(PDDocument document, float width, float height) {
-        PDPage page = new PDPage(
-                new PDRectangle(width, height));
-
-        document.addPage(page);
-
-        return page;
+        addPage(page);
     }
 
     void addPage(PDPage page) throws IOException {
