@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execute;
+package com.vnaskos.pdfguru.execution.document;
 
 import com.vnaskos.pdfguru.input.items.InputItem;
 
@@ -12,6 +12,6 @@ public interface DocumentManager extends Finishable {
 
     void closeDocument() throws IOException;
 
-    void addInputItem(InputItem inputItem, float compression) throws IOException;
+    void addInputItem(InputItem inputItem, float compression);
 
 }

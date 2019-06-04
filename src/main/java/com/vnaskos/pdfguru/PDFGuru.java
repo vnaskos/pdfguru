@@ -1,8 +1,8 @@
 package com.vnaskos.pdfguru;
 
-import com.vnaskos.pdfguru.execute.OutputParameters;
-import com.vnaskos.pdfguru.execute.PdfboxDocumentManager;
-import com.vnaskos.pdfguru.execute.ProcessHandler;
+import com.vnaskos.pdfguru.execution.OutputParameters;
+import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
+import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
 import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
@@ -58,7 +58,7 @@ public class PDFGuru extends javax.swing.JFrame {
             public void warn() {
                 try {
                     InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-                    item.setPages(jTextField1.getText());
+                    item.setPagesPattern(jTextField1.getText());
                 } catch(Exception e) {
                     
                 }
@@ -98,7 +98,7 @@ public class PDFGuru extends javax.swing.JFrame {
         jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("PDF Guru v0.3");
+        setTitle("PDF Guru v0.3.1");
 
         inputPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Input"));
 
@@ -343,7 +343,7 @@ public class PDFGuru extends javax.swing.JFrame {
         }
 
         PdfboxDocumentManager documentManager = new PdfboxDocumentManager();
-        ProcessHandler handler = new ProcessHandler(documentManager, files, params);
+        ProcessOrchestrator handler = new ProcessOrchestrator(documentManager, files, params);
         OutputDialog outputDialog = new OutputDialog(files.size(), handler);
         outputDialog.setVisible(true);
         documentManager.registerProgressListener(outputDialog);
@@ -361,7 +361,7 @@ public class PDFGuru extends javax.swing.JFrame {
     private void inputListValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_inputListValueChanged
         try {
             InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-            jTextField1.setText(item.getPages());
+            jTextField1.setText(item.getPagesPattern());
         } catch(Exception e) {
             
         }

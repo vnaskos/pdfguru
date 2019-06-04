@@ -1,5 +1,6 @@
-package com.vnaskos.pdfguru.execute;
+package com.vnaskos.pdfguru.execution;
 
+import com.vnaskos.pdfguru.execution.document.DocumentManager;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -13,7 +14,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ProcessHandlerTest {
+public class ProcessOrchestratorTest {
 
     private final DocumentManager fakeDocumentManager = mock(DocumentManager.class);
 
@@ -27,9 +28,9 @@ public class ProcessHandlerTest {
 
     @Test
     public void saveLocalInputItemToSinglePdf() throws IOException {
-        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, SINGLE_FILE_INPUT, fakeOutput);
+        ProcessOrchestrator processOrchestrator = new ProcessOrchestrator(fakeDocumentManager, SINGLE_FILE_INPUT, fakeOutput);
 
-        processHandler.startProcess();
+        processOrchestrator.startProcess();
 
         InOrder inOrder = inOrder(fakeDocumentManager);
         inOrder.verify(fakeDocumentManager, atLeastOnce()).openNewDocument();
@@ -39,9 +40,9 @@ public class ProcessHandlerTest {
     @Test
     public void saveMultipleLocalInputItemsToIndividualPdfOneForEachInput() throws IOException {
         fakeOutput.setMultiFileOutput();
-        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
+        ProcessOrchestrator processOrchestrator = new ProcessOrchestrator(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
 
-        processHandler.startProcess();
+        processOrchestrator.startProcess();
 
         InOrder inOrder = inOrder(fakeDocumentManager);
         inOrder.verify(fakeDocumentManager).openNewDocument();
@@ -51,14 +52,14 @@ public class ProcessHandlerTest {
     }
 
     @Test
-    public void whenRequestedByUserStopProcess() throws IOException {
-        ProcessHandler processHandler = new ProcessHandler(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
+    public void whenCancelRequestedByUserProcessShouldStop() throws IOException {
+        ProcessOrchestrator processOrchestrator = new ProcessOrchestrator(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
 
-        processHandler.requestStop();
-        processHandler.startProcess();
+        processOrchestrator.requestStop();
+        processOrchestrator.startProcess();
 
-        verify(fakeDocumentManager, times(0)).saveDocument(any());
-        verify(fakeDocumentManager, times(0)).notifyFinish();
+        verify(fakeDocumentManager, never()).saveDocument(any());
+        verify(fakeDocumentManager, times(1)).notifyFinish();
     }
 
     private static List<InputItem> input(String... localFilePaths) {

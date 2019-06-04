@@ -1,9 +1,12 @@
-package com.vnaskos.pdfguru.execute;
+package com.vnaskos.pdfguru.execution.document.pdfbox;
 
+import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +14,6 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
 
 public class PdfboxDocumentManagerTest {
 
@@ -63,12 +65,16 @@ public class PdfboxDocumentManagerTest {
 
         managerSpyWithRealDoc.addInputItem(SAMPLE_128x128_IMG, ANY_COMPRESSION);
 
-        verify(managerSpyWithRealDoc, times(1))
-                .addBlankPage(any(PDDocument.class), eq(128.0f), eq(128.0f));
+        ArgumentCaptor<PDPage> pageCaptor = ArgumentCaptor.forClass(PDPage.class);
+        verify(managerSpyWithRealDoc, times(1)).addPage(pageCaptor.capture());
+
+        PDPage imagePage = pageCaptor.getValue();
+        assertThat(imagePage.getMediaBox().getWidth()).isEqualTo(128.0f);
+        assertThat(imagePage.getMediaBox().getHeight()).isEqualTo(128.0f);
     }
 
     @Test
-    public void addImageThatIsUnableToLoadShouldContinueProcessWithoutAddingAnyPage() throws IOException {
+    public void addImageUnableToLoadShouldContinueProcessWithoutAddingAnyPage() {
         PDDocument docSpy = spy(PDDocument.class);
         PdfboxDocumentManager managerSpyWithRealDoc = spy(PdfboxDocumentManager.class);
         doReturn(docSpy).when(managerSpyWithRealDoc).createNewDocument();
@@ -79,6 +85,15 @@ public class PdfboxDocumentManagerTest {
         managerSpyWithRealDoc.addInputItem(nonExistingImage, ANY_COMPRESSION);
 
         assertThat(docSpy.getNumberOfPages()).isEqualTo(0);
+    }
+
+    @Test
+    public void addPdfUnableToLoadShouldContinueProcessWithoutAddingAnyPage() throws IOException {
+        InputItem nonExistingPdf = new InputItem("/NON-EXISTING/PDF.pdf");
+
+        managerSpy.addInputItem(nonExistingPdf, ANY_COMPRESSION);
+
+        verify(managerSpy, never()).addPage(any());
     }
 
     @Test
