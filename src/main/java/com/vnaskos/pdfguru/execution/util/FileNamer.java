@@ -1,14 +1,14 @@
-package com.vnaskos.pdfguru.execution;
+package com.vnaskos.pdfguru.execution.util;
 
 import java.io.File;
 
-class FileNamer {
+public class FileNamer {
 
     private static final int INITIAL_INDEX = 1;
 
     private int index = INITIAL_INDEX;
 
-    String createUniqueOutputFileName(String outputPath) {
+    public String createUniqueOutputFileName(String outputPath) {
         String outputFilePath = outputPath;
 
         if(outputFilePath.toLowerCase().endsWith(".pdf")) {

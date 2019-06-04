@@ -1,5 +1,7 @@
 package com.vnaskos.pdfguru.execution;
 
+import com.vnaskos.pdfguru.execution.util.FileNamer;
+import com.vnaskos.pdfguru.execution.util.PagePatternTranslator;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
@@ -18,15 +20,15 @@ import static org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode.APPEND;
 
 public class PdfboxDocumentManager implements DocumentManager {
 
-    private List<ExecutionProgressListener> progressListeners = new ArrayList<>();
-    private PDDocument newDoc;
+    private FileNamer fileNamer = new FileNamer();
 
-    private final ArrayList<PDDocument> pdfSourcesNotToBeGCd = new ArrayList<>();
+    private final List<ExecutionProgressListener> progressListeners = new ArrayList<>();
+    private final List<PDDocument> pdfSourcesNotToBeGCd = new ArrayList<>();
+    private PDDocument newDoc;
 
     @Override
     public void openNewDocument() {
-        newDoc = createNewDocument();
-    }
+        newDoc = createNewDocument();    }
 
     PDDocument createNewDocument() {
         return new PDDocument();
@@ -34,7 +36,6 @@ public class PdfboxDocumentManager implements DocumentManager {
 
     @Override
     public void saveDocument(String path) throws IOException {
-        FileNamer fileNamer = new FileNamer();
         String filepath = fileNamer.createUniqueOutputFileName(path);
         newDoc.save(filepath);
         closeDocument();

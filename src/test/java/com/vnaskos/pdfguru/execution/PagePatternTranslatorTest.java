@@ -1,5 +1,6 @@
 package com.vnaskos.pdfguru.execution;
 
+import com.vnaskos.pdfguru.execution.util.PagePatternTranslator;
 import org.junit.Test;
 
 import java.util.List;
