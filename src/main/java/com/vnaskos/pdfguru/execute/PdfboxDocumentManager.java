@@ -3,6 +3,7 @@ package com.vnaskos.pdfguru.execute;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
@@ -24,7 +25,11 @@ public class PdfboxDocumentManager implements DocumentManager {
 
     @Override
     public void openNewDocument() {
-        newDoc = new PDDocument();
+        newDoc = createNewDocument();
+    }
+
+    PDDocument createNewDocument() {
+        return new PDDocument();
     }
 
     @Override
@@ -64,14 +69,14 @@ public class PdfboxDocumentManager implements DocumentManager {
 
     private void addPDF(InputItem file)
             throws IOException {
-        PDDocument sourcePdf = PDDocument.load(new File(file.getPath()));
-        pdfSourcesNotToBeGCd.add(sourcePdf);
-
-        if (sourcePdf.isEncrypted()) {
-            sourcePdf.close();
+        PDDocument sourcePdf;
+        try {
+            sourcePdf = PDDocument.load(new File(file.getPath()));
+        } catch (InvalidPasswordException ex) {
             progressListeners.forEach(l -> l.updateStatus("Skip encrypted! %s" + file));
             return;
         }
+        pdfSourcesNotToBeGCd.add(sourcePdf);
 
         PDDocumentCatalog cat = sourcePdf.getDocumentCatalog();
         PDPageTree pages = cat.getPages();
@@ -82,10 +87,11 @@ public class PdfboxDocumentManager implements DocumentManager {
         }
     }
 
-    void addImage(InputItem file, float compression) throws IOException {
+    private void addImage(InputItem file, float compression) throws IOException {
         BufferedImage image = loadImage(file.getPath());
 
         if (image == null) {
+            progressListeners.forEach(l -> l.updateStatus("Skip image %s" + file));
             return;
         }
 
@@ -98,18 +104,15 @@ public class PdfboxDocumentManager implements DocumentManager {
     }
 
     private BufferedImage loadImage(String file) {
-        BufferedImage bufferedImage = null;
-
         try {
-            bufferedImage = ImageIO.read(new File(file));
+            return ImageIO.read(new File(file));
         } catch (IOException e) {
-            progressListeners.forEach(l -> l.updateStatus("Skip, couldn't load image! %s" + file));
+            progressListeners.forEach(l -> l.updateStatus("Unable to load image %s" + file));
+            return null;
         }
-
-        return bufferedImage;
     }
 
-    private PDPage addBlankPage(PDDocument document, float width, float height) {
+    PDPage addBlankPage(PDDocument document, float width, float height) {
         PDPage page = new PDPage(
                 new PDRectangle(width, height));
 
