@@ -54,14 +54,14 @@ public class FileBrowser {
         return fileChooser;
     }
     
-    public void selectFiles(SelectedFilesCallback callback) {
+    public void selectFiles(FileArrayConsumer callback) {
         if (fileChooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
-            callback.handleSelectedFiles(new File[0]);
+            callback.handleArray(new File[0]);
             return;
         }
 
         lastDir = fileChooser.getSelectedFile().getPath();
-        callback.handleSelectedFiles(fileChooser.getSelectedFiles());
+        callback.handleArray(fileChooser.getSelectedFiles());
     }
     
 }

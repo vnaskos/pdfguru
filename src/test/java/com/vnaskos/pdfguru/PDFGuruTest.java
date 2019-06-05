@@ -1,12 +1,10 @@
 package com.vnaskos.pdfguru;
 
-import com.vnaskos.pdfguru.input.DirectoryScanner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
-import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 
@@ -24,10 +22,6 @@ public class PDFGuruTest {
 
     @Test
     public void addFilesShouldPopulateTheListModel() {
-        DirectoryScanner fakeDirectoryScanner = mock(DirectoryScanner.class);
-        doReturn(fakeDirectoryScanner).when(pdfGuruSpy).getDirectoryScanner();
-        doReturn(Arrays.asList(THREE_INPUT_FILES)).when(fakeDirectoryScanner).getAllSupportedFiles(any());
-
         pdfGuruSpy.addElements(THREE_INPUT_FILES);
 
         verify(pdfGuruSpy, times(3)).addToModel(any());

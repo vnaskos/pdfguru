@@ -76,7 +76,10 @@ public class PDFGuru extends JFrame {
         JButton addButton = new JButton();
         addButton.setName("addButton");
         addButton.setText("Add");
-        addButton.addActionListener(evt -> fileBrowser.selectFiles(this::addElements));
+        addButton.addActionListener(evt ->
+                fileBrowser.selectFiles(
+                        selectedFiles -> directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
+                                this::addElements)));
 
         upButton.setText("Up");
         upButton.addActionListener(evt -> moveUp());
@@ -327,9 +330,7 @@ public class PDFGuru extends JFrame {
             return;
         }
 
-        List<File> files = directoryScanner.getAllSupportedFiles(selectedFiles);
-
-        for (File file : files) {
+        for (File file : selectedFiles) {
             String path = FilenameUtils.normalize(file.getPath());
             InputItem item = new InputItem(path);
             addToModel(item);

@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,22 +44,20 @@ public class DirectoryScannerTest {
     public void providingOnlyFilesShouldReturnThatFiles() {
         File[] selectedFiles = { supportedFile, unsupportedFile, supportedFileInSubDir, unsupportedFileInSubDir };
 
-        List<File> supportedFiles = directoryScanner.getAllSupportedFiles(selectedFiles);
-
-        assertThat(supportedFiles)
-                .contains(supportedFile)
-                .hasSize(2);
+        directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
+                supportedFiles -> assertThat(supportedFiles)
+                        .contains(supportedFile)
+                        .hasSize(2));
     }
 
     @Test
     public void providingDirectoriesWithFilesShouldReturnOnlyTheSupportedFilesContained() {
         File[] selectedFiles = { subDir.toFile(), supportedFile, unsupportedFile };
 
-        List<File> supportedFiles = directoryScanner.getAllSupportedFiles(selectedFiles);
-
-        assertThat(supportedFiles)
-                .contains(supportedFile)
-                .hasSize(2);
+        directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
+                supportedFiles -> assertThat(supportedFiles)
+                        .contains(supportedFile)
+                        .hasSize(2));
     }
 
     @Test
@@ -69,11 +66,10 @@ public class DirectoryScannerTest {
                 supportedFile, unsupportedFile,
                 supportedFileInSubDir, unsupportedFileInSubDir };
 
-        List<File> supportedFiles = directoryScanner.getAllSupportedFiles(selectedFiles);
-
-        assertThat(supportedFiles)
-                .contains(supportedFile)
-                .hasSize(5);
+        directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
+                supportedFiles -> assertThat(supportedFiles)
+                        .contains(supportedFile)
+                        .hasSize(5));
     }
 
 }

@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class DirectoryScanner {
 
-    public List<File> getAllSupportedFiles(File[] selectedFiles) {
+    public void scanSubDirectoriesForSupportedFiles(File[] selectedFiles, FileArrayConsumer callback) {
         List<File> supportedFiles = new ArrayList<>();
 
         for(File file : selectedFiles) {
@@ -22,7 +22,7 @@ public class DirectoryScanner {
             }
         }
 
-        return supportedFiles;
+        callback.handleArray(supportedFiles.toArray(new File[0]));
     }
     
     private void scanDirectories(List<File> supportedFilesAccumulator, File parentFile) {
