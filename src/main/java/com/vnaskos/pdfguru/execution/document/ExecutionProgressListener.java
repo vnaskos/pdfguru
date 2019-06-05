@@ -6,5 +6,4 @@ public interface ExecutionProgressListener {
 
     void updateStatus(String status);
 
-    void finish();
 }

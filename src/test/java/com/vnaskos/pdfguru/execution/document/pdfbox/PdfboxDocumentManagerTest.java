@@ -96,19 +96,6 @@ public class PdfboxDocumentManagerTest {
         verify(managerSpy, never()).addPage(any());
     }
 
-    @Test
-    public void progressListenersShouldGetNotifiedWhenProcessIsFinished() {
-        ExecutionProgressListener progressListener1 = mock(ExecutionProgressListener.class);
-        ExecutionProgressListener progressListener2 = mock(ExecutionProgressListener.class);
-
-        managerSpy.registerProgressListener(progressListener1);
-        managerSpy.registerProgressListener(progressListener2);
-        managerSpy.notifyFinish();
-
-        verify(progressListener1, times(1)).finish();
-        verify(progressListener2, times(1)).finish();
-    }
-
     private static InputItem input(String localFilePath) {
         File inputImage = new File(localFilePath);
         return new InputItem(inputImage.getAbsolutePath());

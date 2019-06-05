@@ -72,7 +72,6 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
 
     @Override
     public void notifyFinish() {
-        progressListeners.forEach(ExecutionProgressListener::finish);
     }
 
     @Override
