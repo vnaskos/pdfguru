@@ -104,6 +104,7 @@ public class PDFGuru extends JFrame {
         outputPanel.setBorder(BorderFactory.createTitledBorder("Output"));
 
         JButton outputBrowseButton = new JButton();
+        outputBrowseButton.setName("outputBrowseButton");
         outputBrowseButton.setText("...");
         outputBrowseButton.addActionListener(evt -> fileBrowser.selectOutputDirectory(files -> browseOutput(files[0])));
 

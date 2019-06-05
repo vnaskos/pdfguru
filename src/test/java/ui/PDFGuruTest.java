@@ -54,6 +54,14 @@ public class PDFGuruTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
+    public void shouldOpenFileChooserWhenOuputBrowseButtonIsClicked() {
+        window.button("outputBrowseButton").click();
+
+        ComponentFinder finder = BasicComponentFinder.finderWithCurrentAwtHierarchy();
+        finder.find(component -> component instanceof JFileChooser).isVisible();
+    }
+
+    @Test
     public void shouldMoveItemUpWhenUpButtonIsClicked() {
         GuiActionRunner.execute(() -> pdfGuruFrame.addElements(new File[]{
                 new File("/file/1.pdf"),
