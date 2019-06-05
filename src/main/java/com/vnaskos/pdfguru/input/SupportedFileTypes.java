@@ -9,36 +9,25 @@ import java.util.HashSet;
  * @author Vasilis Naskos
  */
 public class SupportedFileTypes {
-    
-    public static boolean isSupported(String fileType) {
-        HashSet<String> supportedInputExtensions = new HashSet<String>();
 
-        supportedInputExtensions.addAll(Arrays.asList(
-                "jpg", "jpeg", "png", "bmp",
-                "tiff", "tif", "gif", "psd",
-                "tga", "pdf"
-        ));
-        
+    private static final HashSet<String> supportedInputExtensions = new HashSet<>(Arrays.asList(
+            "jpg", "jpeg", "png", "bmp",
+            "tiff", "tif", "gif", "psd",
+            "tga", "pdf"));
+
+    public static boolean isSupported(String fileType) {
         return supportedInputExtensions.contains(fileType.toLowerCase());
     }
     
     public static boolean isSupported(File file) {
-        String extension = getFileExtension(file);
+        String extension = getFileExtension(file.getAbsolutePath());
         
         return isSupported(extension);
     }
     
-    public static String getFileExtension(String file) {
-        int indexOfExtension = file.lastIndexOf('.') + 1;
+    public static String getFileExtension(String filepath) {
+        int indexOfExtension = filepath.lastIndexOf('.') + 1;
 
-        String extension = file.substring(indexOfExtension);
-
-        return extension;
-    }
-    
-    public static String getFileExtension(File file) {
-        String filePath = file.getAbsolutePath();
-        
-        return getFileExtension(filePath);
+        return filepath.substring(indexOfExtension);
     }
 }
