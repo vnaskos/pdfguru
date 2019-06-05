@@ -26,7 +26,7 @@ public class PDFGuru extends JFrame {
 
     private JSpinner compressionSpinner;
     private JList inputList;
-    private JTextField jTextField1;
+    private JTextField pagesTextField;
     private JTextField outputFilepathField;
     private JCheckBox multipleFileOutputCheckBox;
 
@@ -41,56 +41,48 @@ public class PDFGuru extends JFrame {
         inputList.setModel(model);
     }
 
-    public FileBrowser createFileChooser(Container parent) {
+    FileBrowser createFileChooser(Container parent) {
         return new FileBrowser(parent);
     }
 
     private void initComponents() {
-        JPanel inputPanel = new JPanel();
-        JButton upButton = new JButton();
-        JButton downButton = new JButton();
-        JButton removeButton = new JButton();
-        JButton clearButton = new JButton();
-        JScrollPane inputScrollPane = new JScrollPane();
-        inputList = new JList();
-        JPanel outputPanel = new JPanel();
-        JButton outputBrowseButton = new JButton();
-        outputFilepathField = new JTextField();
-        compressionSpinner = new JSpinner();
-        JLabel compressionLabel = new JLabel();
-        multipleFileOutputCheckBox = new JCheckBox();
-        JButton okButton = new JButton();
-        JPanel jPanel1 = new JPanel();
-        jTextField1 = new JTextField();
-        JButton pagesHelpButton = new JButton();
-        JButton aboutButton = new JButton();
-
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("PDF Guru v0.3.1");
 
+        JPanel inputPanel = new JPanel();
         inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
+
+        inputList = new JList();
+        inputList.addListSelectionListener(this::inputListValueChanged);
+        JScrollPane inputScrollPane = new JScrollPane();
+        inputScrollPane.setViewportView(inputList);
 
         JButton addButton = new JButton();
         addButton.setName("addButton");
         addButton.setText("Add");
         addButton.addActionListener(evt -> fileBrowser.selectFiles(this::addElements));
 
+        JButton upButton = new JButton();
         upButton.setText("Up");
         upButton.addActionListener(evt -> moveUp());
 
+        JButton downButton = new JButton();
         downButton.setText("Down");
         downButton.addActionListener(evt -> moveDown());
 
+        JButton removeButton = new JButton();
         removeButton.setText("Remove");
         removeButton.addActionListener(evt -> removeSelected());
 
+        JButton clearButton = new JButton();
         clearButton.setText("Clear");
         clearButton.addActionListener(evt -> model.removeAllElements());
 
-        inputList.addListSelectionListener(this::inputListValueChanged);
-        inputScrollPane.setViewportView(inputList);
+        JPanel pagesPanel = new JPanel();
+        pagesPanel.setBorder(BorderFactory.createTitledBorder("Pages"));
 
-        jTextField1.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        pagesTextField = new JTextField();
+        pagesTextField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
                 warn();
@@ -108,9 +100,40 @@ public class PDFGuru extends JFrame {
 
             private void warn() {
                 InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-                item.setPagesPattern(jTextField1.getText());
+                item.setPagesPattern(pagesTextField.getText());
             }
         });
+
+        JButton pagesHelpButton = new JButton();
+        pagesHelpButton.setText("?");
+        pagesHelpButton.addActionListener(this::pagesHelpButtonActionPerformed);
+
+        JPanel outputPanel = new JPanel();
+        outputPanel.setBorder(BorderFactory.createTitledBorder("Output"));
+
+        JButton outputBrowseButton = new JButton();
+        outputBrowseButton.setText("...");
+        outputBrowseButton.addActionListener(evt -> browseOutput());
+
+        outputFilepathField = new JTextField();
+        outputFilepathField.setText(System.getProperty("user.home"));
+
+        JLabel compressionLabel = new JLabel();
+        compressionLabel.setText("compression:");
+        compressionSpinner = new JSpinner();
+        compressionSpinner.setModel(new SpinnerNumberModel(Float.valueOf(0.5f), Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(0.1f)));
+
+        multipleFileOutputCheckBox = new JCheckBox();
+        multipleFileOutputCheckBox.setText("Export in multiple files");
+
+        JButton okButton = new JButton();
+        okButton.setText("OK");
+        okButton.addActionListener(this::okButtonActionPerformed);
+
+        JButton aboutButton = new JButton();
+        aboutButton.setName("aboutButton");
+        aboutButton.setText("About");
+        aboutButton.addActionListener(evt -> AboutMeFrame.display());
 
         GroupLayout inputPanelLayout = new GroupLayout(inputPanel);
         inputPanel.setLayout(inputPanelLayout);
@@ -143,19 +166,6 @@ public class PDFGuru extends JFrame {
                     .addComponent(clearButton))
                 .addContainerGap())
         );
-
-        outputPanel.setBorder(BorderFactory.createTitledBorder("Output"));
-
-        outputBrowseButton.setText("...");
-        outputBrowseButton.addActionListener(evt -> browseOutput());
-
-        outputFilepathField.setText(System.getProperty("user.home"));
-
-        compressionSpinner.setModel(new SpinnerNumberModel(Float.valueOf(0.5f), Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(0.1f)));
-
-        compressionLabel.setText("compression:");
-
-        multipleFileOutputCheckBox.setText("Export in multiple files");
 
         GroupLayout outputPanelLayout = new GroupLayout(outputPanel);
         outputPanel.setLayout(outputPanelLayout);
@@ -190,21 +200,13 @@ public class PDFGuru extends JFrame {
                 .addContainerGap())
         );
 
-        okButton.setText("OK");
-        okButton.addActionListener(this::okButtonActionPerformed);
-
-        jPanel1.setBorder(BorderFactory.createTitledBorder("Pages"));
-
-        pagesHelpButton.setText("?");
-        pagesHelpButton.addActionListener(this::pagesHelpButtonActionPerformed);
-
-        GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
+        GroupLayout jPanel1Layout = new GroupLayout(pagesPanel);
+        pagesPanel.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addGroup(GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTextField1)
+                .addComponent(pagesTextField)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pagesHelpButton, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -214,21 +216,17 @@ public class PDFGuru extends JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pagesTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(pagesHelpButton))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        aboutButton.setName("aboutButton");
-        aboutButton.setText("About");
-        aboutButton.addActionListener(evt -> AboutMeFrame.display());
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addComponent(inputPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(pagesPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(outputPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
@@ -242,7 +240,7 @@ public class PDFGuru extends JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(inputPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                .addComponent(pagesPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(outputPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -290,7 +288,7 @@ public class PDFGuru extends JFrame {
     private void inputListValueChanged(javax.swing.event.ListSelectionEvent evt) {
         try {
             InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-            jTextField1.setText(item.getPagesPattern());
+            pagesTextField.setText(item.getPagesPattern());
         } catch(Exception e) {
             
         }
