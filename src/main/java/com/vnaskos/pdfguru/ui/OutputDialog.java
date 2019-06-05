@@ -1,7 +1,7 @@
 package com.vnaskos.pdfguru.ui;
 
-import com.vnaskos.pdfguru.execution.ExecutionControlListener;
-import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
+import com.vnaskos.pdfguru.ExecutionControlListener;
+import com.vnaskos.pdfguru.ExecutionProgressListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -21,9 +21,8 @@ public class OutputDialog extends javax.swing.JFrame implements ExecutionProgres
     private final int totalItemsToProcess;
     private int processedItems = 0;
 
-    public OutputDialog(int totalItemsToProcess, ExecutionControlListener executionControlListener) {
+    public OutputDialog(int totalItemsToProcess) {
         this.totalItemsToProcess = totalItemsToProcess;
-        this.executionControlListener = executionControlListener;
 
         initComponents();
         this.setLocationRelativeTo(null);
@@ -82,8 +81,14 @@ public class OutputDialog extends javax.swing.JFrame implements ExecutionProgres
         pack();
     }
 
+    public void setExecutionControlListener(ExecutionControlListener executionControlListener) {
+        this.executionControlListener = executionControlListener;
+    }
+
     private void cancelButtonActionPerformed(ActionEvent evt) {
-        executionControlListener.requestStop();
+        if (executionControlListener != null) {
+            executionControlListener.requestStop();
+        }
         this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 

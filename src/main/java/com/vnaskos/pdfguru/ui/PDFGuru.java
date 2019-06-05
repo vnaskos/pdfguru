@@ -262,11 +262,14 @@ public class PDFGuru extends JFrame {
             params.setMultiFileOutput();
         }
 
+        OutputDialog outputDialog = new OutputDialog(files.size());
+        outputDialog.setVisible(true);
+
         PdfboxDocumentManager documentManager = new PdfboxDocumentManager();
         ProcessOrchestrator handler = new ProcessOrchestrator(documentManager, files, params);
-        OutputDialog outputDialog = new OutputDialog(files.size(), handler);
-        outputDialog.setVisible(true);
         documentManager.registerProgressListener(outputDialog);
+
+        outputDialog.setExecutionControlListener(handler);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
