@@ -1,5 +1,6 @@
-package com.vnaskos.pdfguru.ui;
+package ui;
 
+import com.vnaskos.pdfguru.ui.AboutMeFrame;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;

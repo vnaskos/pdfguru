@@ -1,9 +1,11 @@
-package com.vnaskos.pdfguru.ui;
+package ui;
 
 import com.vnaskos.pdfguru.execution.ExecutionControlListener;
+import com.vnaskos.pdfguru.ui.OutputDialog;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.timing.Pause;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -41,7 +43,8 @@ public class OutputDialogTest {
 
     @Test
     public void shouldCloseTheFrameWhenCancelButtonIsClicked() {
-        window.requireVisible().button("cancelButton").click();
+        window.button("cancelButton").click();
+        Pause.pause(100);
         window.requireNotVisible();
     }
 

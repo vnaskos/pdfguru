@@ -1,10 +1,12 @@
-package com.vnaskos.pdfguru.ui;
+package ui;
 
 import com.vnaskos.pdfguru.PDFGuru;
+import com.vnaskos.pdfguru.ui.AboutMeFrame;
 import org.assertj.swing.core.BasicComponentFinder;
 import org.assertj.swing.core.ComponentFinder;
 import org.assertj.swing.core.ComponentMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
+import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
@@ -30,7 +32,7 @@ public class PDFGuruTest extends AssertJSwingJUnitTestCase {
     @Test
     public void shouldOpenAboutMeFrameWhenAboutButtonIsClicked() {
         window.button("aboutButton").click();
-        FrameFixture aboutFrame = findFrame(AboutMeFrame.class)
+        FrameFixture aboutFrame = WindowFinder.findFrame(AboutMeFrame.class)
                 .withTimeout(5, TimeUnit.SECONDS)
                 .using(robot());
         aboutFrame.requireVisible();
