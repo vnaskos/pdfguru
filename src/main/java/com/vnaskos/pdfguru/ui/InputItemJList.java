@@ -23,34 +23,45 @@ public class InputItemJList extends JList<InputItem> {
     }
 
     public void moveSelectedUp() {
-        int[] selected = getSelectedIndices();
-        for (int i = 0; i < selected.length; i++) {
-            moveElement(selected[i], MoveDirection.UP);
-            selected[i]--;
+        int topIndex = 0;
+        if (getMinSelectionIndex() == topIndex) {
+            return;
         }
-        setSelectedIndices(selected);
-    }
 
-    public void moveSelectedDown() {
-        int[] selected = getSelectedIndices();
-        for (int i = selected.length - 1; i >= 0; i--) {
-            moveElement(selected[i], MoveDirection.DOWN);
-            selected[i]++;
+        int[] selection = getSelectedIndices();
+        int[] newSelection = new int[selection.length];
+        for (int i=0; i<selection.length; i++) {
+            newSelection[i] = moveElement(selection[i], MoveDirection.UP);
         }
-        setSelectedIndices(selected);
-    }
 
-    private void moveElement(int indexOfSelected, MoveDirection direction) {
-        swapElements(indexOfSelected, indexOfSelected + direction.value);
-        indexOfSelected = indexOfSelected + direction.value;
-        setSelectedIndex(indexOfSelected);
+        setSelectedIndices(newSelection);
         updateUI();
     }
 
-    private void swapElements(int pos1, int pos2) {
-        InputItem tmp = model.get(pos1);
-        model.set(pos1, model.get(pos2));
-        model.set(pos2, tmp);
+    public void moveSelectedDown() {
+        int bottomIndex = model.size()-1;
+        if (getMaxSelectionIndex() == bottomIndex) {
+            return;
+        }
+
+        int[] selection = getSelectedIndices();
+        int[] newSelection = new int[selection.length];
+        for (int i=selection.length-1; i>=0; i--) {
+            newSelection[i] = moveElement(selection[i], MoveDirection.DOWN);
+        }
+
+        setSelectedIndices(newSelection);
+        updateUI();
+    }
+
+    private int moveElement(int selectedIndex, MoveDirection direction) {
+        int newIndex = selectedIndex + direction.value;
+
+        InputItem tmp = model.get(selectedIndex);
+        model.set(selectedIndex, model.get(newIndex));
+        model.set(newIndex, tmp);
+
+        return newIndex;
     }
 
     public void removeAll() {
