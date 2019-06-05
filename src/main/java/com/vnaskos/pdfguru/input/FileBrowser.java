@@ -61,7 +61,8 @@ public class FileBrowser {
         }
 
         lastDir = fileChooser.getSelectedFile().getPath();
-        callback.handleArray(fileChooser.getSelectedFiles());
+
+        DirectoryScanner.scanSubDirectoriesForSupportedFiles(fileChooser.getSelectedFiles(), callback);
     }
     
 }

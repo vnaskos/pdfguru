@@ -36,7 +36,7 @@ public class OutputDialogTest extends AssertJSwingJUnitTestCase {
     @Test
     public void shouldCloseTheFrameWhenCancelButtonIsClicked() {
         window.button("cancelButton").click();
-        Pause.pause(100);
+        Pause.pause(200);
         window.requireNotVisible();
     }
 

@@ -20,8 +20,6 @@ public class DirectoryScannerTest {
     private static File unsupportedFile;
     private static File unsupportedFileInSubDir;
 
-    private final DirectoryScanner directoryScanner = new DirectoryScanner();
-
     @BeforeClass
     public static void createFakeFileStructure() throws IOException {
         dir = Files.createTempDirectory("pdfguru");
@@ -44,7 +42,7 @@ public class DirectoryScannerTest {
     public void providingOnlyFilesShouldReturnThatFiles() {
         File[] selectedFiles = { supportedFile, unsupportedFile, supportedFileInSubDir, unsupportedFileInSubDir };
 
-        directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
+        DirectoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
                 supportedFiles -> assertThat(supportedFiles)
                         .contains(supportedFile)
                         .hasSize(2));
@@ -54,7 +52,7 @@ public class DirectoryScannerTest {
     public void providingDirectoriesWithFilesShouldReturnOnlyTheSupportedFilesContained() {
         File[] selectedFiles = { subDir.toFile(), supportedFile, unsupportedFile };
 
-        directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
+        DirectoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
                 supportedFiles -> assertThat(supportedFiles)
                         .contains(supportedFile)
                         .hasSize(2));
@@ -66,7 +64,7 @@ public class DirectoryScannerTest {
                 supportedFile, unsupportedFile,
                 supportedFileInSubDir, unsupportedFileInSubDir };
 
-        directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
+        DirectoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
                 supportedFiles -> assertThat(supportedFiles)
                         .contains(supportedFile)
                         .hasSize(5));
@@ -75,21 +73,21 @@ public class DirectoryScannerTest {
     @Test
     public void fileWithPdfExtensionShouldBeASupportedFile() {
         File pdf = new File("/providing/a.pdf");
-        boolean isPdfFileSupported = directoryScanner.isSupported(pdf);
+        boolean isPdfFileSupported = DirectoryScanner.isSupported(pdf);
         assertThat(isPdfFileSupported).isTrue();
     }
 
     @Test
     public void fileWithAnUnknownFileExtensionShouldBeAnUnsupportedFile() {
         File unknown = new File("/providing/a.unknown");
-        boolean isUnknownFileSupported = directoryScanner.isSupported(unknown);
+        boolean isUnknownFileSupported = DirectoryScanner.isSupported(unknown);
         assertThat(isUnknownFileSupported).isFalse();
     }
 
     @Test
     public void fileWithoutExtensionShouldBeUnsupported() {
         File withoutExtension = new File("/providing/a");
-        boolean isFileWithoutExtensionSupported = directoryScanner.isSupported(withoutExtension);
+        boolean isFileWithoutExtensionSupported = DirectoryScanner.isSupported(withoutExtension);
         assertThat(isFileWithoutExtensionSupported).isFalse();
     }
 

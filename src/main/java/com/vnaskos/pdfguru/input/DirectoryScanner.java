@@ -10,19 +10,19 @@ import java.util.List;
  *
  * @author Vasilis Naskos
  */
-public class DirectoryScanner {
+class DirectoryScanner {
 
     private static final HashSet<String> supportedInputExtensions = new HashSet<>(Arrays.asList(
             "jpg", "jpeg", "png", "bmp",
             "tiff", "tif", "gif", "psd",
             "tga", "pdf"));
 
-    public void scanSubDirectoriesForSupportedFiles(File[] selectedFiles, FileArrayConsumer callback) {
+    static void scanSubDirectoriesForSupportedFiles(File[] selectedFiles, FileArrayConsumer callback) {
         List<File> supportedFiles = new ArrayList<>();
 
         for(File file : selectedFiles) {
             if (file.isDirectory()) {
-                scanDirectories(supportedFiles, file);
+                scanSubDirectories(supportedFiles, file);
             } else if (isSupported(file)) {
                 supportedFiles.add(file);
             }
@@ -31,19 +31,19 @@ public class DirectoryScanner {
         callback.handleArray(supportedFiles.toArray(new File[0]));
     }
     
-    private void scanDirectories(List<File> supportedFilesAccumulator, File parentFile) {
-        File[] supportedFilesInDir = parentFile.listFiles(this::isSupported);
+    private static void scanSubDirectories(List<File> supportedFilesAccumulator, File parentFile) {
+        File[] supportedFilesInDir = parentFile.listFiles(DirectoryScanner::isSupported);
         if(supportedFilesInDir != null && supportedFilesInDir.length != 0) {
             supportedFilesAccumulator.addAll(Arrays.asList(supportedFilesInDir));
         }
         
         File[] subDirectories = parentFile.listFiles(File::isDirectory);
         if(subDirectories != null  && subDirectories.length != 0) {
-            Arrays.stream(subDirectories).forEach(subDir -> scanDirectories(supportedFilesAccumulator, subDir));
+            Arrays.stream(subDirectories).forEach(subDir -> scanSubDirectories(supportedFilesAccumulator, subDir));
         }
     }
 
-    boolean isSupported(File file) {
+    static boolean isSupported(File file) {
         String filepath = file.getAbsolutePath();
 
         int indexOfExtension = filepath.lastIndexOf('.') + 1;

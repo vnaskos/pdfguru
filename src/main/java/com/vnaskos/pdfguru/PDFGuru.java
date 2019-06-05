@@ -3,7 +3,6 @@ package com.vnaskos.pdfguru;
 import com.vnaskos.pdfguru.execution.OutputParameters;
 import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
 import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
-import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileBrowser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
@@ -32,11 +31,9 @@ public class PDFGuru extends JFrame {
     private JCheckBox multipleFileOutputCheckBox;
 
     private final FileBrowser fileBrowser = createFileChooser(this);
-    private final DirectoryScanner directoryScanner;
     private final DefaultListModel model;
 
     public PDFGuru() {
-        directoryScanner = getDirectoryScanner();
         initComponents();
         this.setLocationRelativeTo(null);
 
@@ -76,10 +73,7 @@ public class PDFGuru extends JFrame {
         JButton addButton = new JButton();
         addButton.setName("addButton");
         addButton.setText("Add");
-        addButton.addActionListener(evt ->
-                fileBrowser.selectFiles(
-                        selectedFiles -> directoryScanner.scanSubDirectoriesForSupportedFiles(selectedFiles,
-                                this::addElements)));
+        addButton.addActionListener(evt -> fileBrowser.selectFiles(this::addElements));
 
         upButton.setText("Up");
         upButton.addActionListener(evt -> moveUp());
@@ -340,11 +334,6 @@ public class PDFGuru extends JFrame {
     void addToModel(InputItem item) {
         model.add(model.size(), item);
     }
-
-    public DirectoryScanner getDirectoryScanner() {
-        return new DirectoryScanner();
-    }
-
 
     private void moveUp() {
         int[] selected = inputList.getSelectedIndices();
