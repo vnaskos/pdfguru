@@ -59,7 +59,6 @@ public class ProcessOrchestratorTest {
         processOrchestrator.startProcess();
 
         verify(fakeDocumentManager, never()).saveDocument(any());
-        verify(fakeDocumentManager, times(1)).notifyFinish();
     }
 
     private static List<InputItem> input(String... localFilePaths) {

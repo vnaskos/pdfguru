@@ -36,8 +36,6 @@ public class ProcessOrchestrator implements ExecutionControlListener {
         } else {
             startMultiOutputProcess();
         }
-
-        documentManager.notifyFinish();
     }
 
     private void startMultiOutputProcess() throws IOException {

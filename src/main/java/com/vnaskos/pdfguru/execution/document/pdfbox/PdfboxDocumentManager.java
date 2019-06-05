@@ -71,10 +71,6 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
     }
 
     @Override
-    public void notifyFinish() {
-    }
-
-    @Override
     public PDDocument getOutputDocument() {
         return outputDocument;
     }

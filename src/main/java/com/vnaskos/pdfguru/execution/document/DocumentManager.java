@@ -4,7 +4,7 @@ import com.vnaskos.pdfguru.input.items.InputItem;
 
 import java.io.IOException;
 
-public interface DocumentManager extends Finishable {
+public interface DocumentManager {
 
     void openNewDocument();
 
