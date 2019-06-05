@@ -24,36 +24,30 @@ import java.util.concurrent.Executors;
  */
 public class PDFGuru extends JFrame {
 
-    private JSpinner compressionSpinner;
-    private JList inputList;
-    private JTextField pagesTextField;
-    private JTextField outputFilepathField;
-    private JCheckBox multipleFileOutputCheckBox;
-
     private final FileBrowser fileBrowser = createFileChooser(this);
-    private final DefaultListModel model;
+    private final DefaultListModel<InputItem> model = new DefaultListModel<>();
+
+    private JList<InputItem> inputList;
+    private JTextField pagesTextField;
+    private JSpinner compressionSpinner;
+    private JCheckBox multipleFileOutputCheckBox;
+    private JTextField outputFilepathField;
 
     public PDFGuru() {
         initComponents();
-        this.setLocationRelativeTo(null);
-
-        model = new DefaultListModel();
-        inputList.setModel(model);
-    }
-
-    FileBrowser createFileChooser(Container parent) {
-        return new FileBrowser(parent);
     }
 
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setTitle("PDF Guru v0.3.1");
 
         JPanel inputPanel = new JPanel();
         inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
 
-        inputList = new JList();
-        inputList.addListSelectionListener(this::inputListValueChanged);
+        inputList = new JList<>();
+        inputList.setModel(model);
+        inputList.addListSelectionListener(evt -> inputListValueChanged());
         JScrollPane inputScrollPane = new JScrollPane();
         inputScrollPane.setViewportView(inputList);
 
@@ -85,28 +79,27 @@ public class PDFGuru extends JFrame {
         pagesTextField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                warn();
+                updateInputItem();
             }
 
             @Override
             public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                warn();
+                updateInputItem();
             }
 
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                warn();
+                updateInputItem();
             }
 
-            private void warn() {
-                InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-                item.setPagesPattern(pagesTextField.getText());
+            private void updateInputItem() {
+                inputList.getSelectedValue().setPagesPattern(pagesTextField.getText());
             }
         });
 
         JButton pagesHelpButton = new JButton();
         pagesHelpButton.setText("?");
-        pagesHelpButton.addActionListener(this::pagesHelpButtonActionPerformed);
+        pagesHelpButton.addActionListener(evt -> pagesHelpButtonActionPerformed());
 
         JPanel outputPanel = new JPanel();
         outputPanel.setBorder(BorderFactory.createTitledBorder("Output"));
@@ -128,7 +121,7 @@ public class PDFGuru extends JFrame {
 
         JButton okButton = new JButton();
         okButton.setText("OK");
-        okButton.addActionListener(this::okButtonActionPerformed);
+        okButton.addActionListener(evt -> okButtonActionPerformed());
 
         JButton aboutButton = new JButton();
         aboutButton.setName("aboutButton");
@@ -253,14 +246,17 @@ public class PDFGuru extends JFrame {
         pack();
     }
 
-    private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    private FileBrowser createFileChooser(Container parent) {
+        return new FileBrowser(parent);
+    }
+
+    private void okButtonActionPerformed() {
         List<InputItem> files = new ArrayList<>();
         float compression = Float.parseFloat(compressionSpinner.getValue().toString());
         String output = outputFilepathField.getText();
         
         for(int i=0; i<model.getSize(); i++) {
-            InputItem file = (InputItem) model.get(i);
-            files.add(file);
+            files.add(model.get(i));
         }
         
         OutputParameters params = new OutputParameters(output);
@@ -285,16 +281,14 @@ public class PDFGuru extends JFrame {
         });
     }
 
-    private void inputListValueChanged(javax.swing.event.ListSelectionEvent evt) {
-        try {
-            InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-            pagesTextField.setText(item.getPagesPattern());
-        } catch(Exception e) {
-            
+    private void inputListValueChanged() {
+        if (inputList.getSelectedValue() == null) {
+            return;
         }
+        pagesTextField.setText(inputList.getSelectedValue().getPagesPattern());
     }
 
-    private void pagesHelpButtonActionPerformed(java.awt.event.ActionEvent evt) {
+    private void pagesHelpButtonActionPerformed() {
         String dialogText = "Leave empty for all pages\n" +
                 "Use page numbers separated by comma \"1,2,3\"\n" +
                 "Use number intervals \"1-4\"\n" +
@@ -336,7 +330,7 @@ public class PDFGuru extends JFrame {
     private void moveUp() {
         int[] selected = inputList.getSelectedIndices();
         for (int i = 0; i < selected.length; i++) {
-            moveElement(selected[i], -1);
+            moveElement(selected[i], MoveDirection.UP);
             selected[i]--;
         }
         inputList.setSelectedIndices(selected);
@@ -345,21 +339,31 @@ public class PDFGuru extends JFrame {
     private void moveDown() {
         int[] selected = inputList.getSelectedIndices();
         for (int i = selected.length - 1; i >= 0; i--) {
-            moveElement(selected[i], 1);
+            moveElement(selected[i], MoveDirection.DOWN);
             selected[i]++;
         }
         inputList.setSelectedIndices(selected);
     }
+
+    private enum MoveDirection {
+        UP(-1), DOWN(1);
+
+        final int value;
+
+        MoveDirection(int value) {
+            this.value = value;
+        }
+    }
     
-    private void moveElement(int indexOfSelected, int direction) {
-        swapElements(indexOfSelected, indexOfSelected + 1 * direction);
-        indexOfSelected = indexOfSelected + 1 * direction;
+    private void moveElement(int indexOfSelected, MoveDirection direction) {
+        swapElements(indexOfSelected, indexOfSelected + direction.value);
+        indexOfSelected = indexOfSelected + direction.value;
         inputList.setSelectedIndex(indexOfSelected);
         inputList.updateUI();
     }
     
     private void swapElements(int pos1, int pos2) {
-        Object tmp = model.get(pos1);
+        InputItem tmp = model.get(pos1);
         model.set(pos1, model.get(pos2));
         model.set(pos2, tmp);
     }
