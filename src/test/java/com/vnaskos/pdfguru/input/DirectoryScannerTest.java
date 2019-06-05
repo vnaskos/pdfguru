@@ -72,4 +72,25 @@ public class DirectoryScannerTest {
                         .hasSize(5));
     }
 
+    @Test
+    public void fileWithPdfExtensionShouldBeASupportedFile() {
+        File pdf = new File("/providing/a.pdf");
+        boolean isPdfFileSupported = directoryScanner.isSupported(pdf);
+        assertThat(isPdfFileSupported).isTrue();
+    }
+
+    @Test
+    public void fileWithAnUnknownFileExtensionShouldBeAnUnsupportedFile() {
+        File unknown = new File("/providing/a.unknown");
+        boolean isUnknownFileSupported = directoryScanner.isSupported(unknown);
+        assertThat(isUnknownFileSupported).isFalse();
+    }
+
+    @Test
+    public void fileWithoutExtensionShouldBeUnsupported() {
+        File withoutExtension = new File("/providing/a");
+        boolean isFileWithoutExtensionSupported = directoryScanner.isSupported(withoutExtension);
+        assertThat(isFileWithoutExtensionSupported).isFalse();
+    }
+
 }
