@@ -1,6 +1,5 @@
 package com.vnaskos.pdfguru.execution;
 
-import com.vnaskos.pdfguru.ExecutionControlListener;
 import com.vnaskos.pdfguru.execution.document.DocumentManager;
 import com.vnaskos.pdfguru.input.InputItem;
 
@@ -11,27 +10,20 @@ import java.util.List;
  *
  * @author Vasilis Naskos
  */
-public class ProcessOrchestrator implements ExecutionControlListener {
-
-    private boolean stopRequested = false;
+class ProcessOrchestrator {
 
     private final DocumentManager documentManager;
     private final List<InputItem> inputItems;
     private final OutputParameters outputParameters;
 
-    public ProcessOrchestrator(DocumentManager documentManager, List<InputItem> inputItems,
+    ProcessOrchestrator(DocumentManager documentManager, List<InputItem> inputItems,
                                OutputParameters outputParameters) {
         this.documentManager = documentManager;
         this.inputItems = inputItems;
         this.outputParameters = outputParameters;
     }
 
-    @Override
-    public void requestStop() {
-        this.stopRequested = true;
-    }
-    
-    public void startProcess() throws IOException {
+    void startProcess() throws IOException {
         if (outputParameters.isSingleFileOutput()) {
             startSingleOutputProcess();
         } else {
@@ -40,36 +32,20 @@ public class ProcessOrchestrator implements ExecutionControlListener {
     }
 
     private void startMultiOutputProcess() throws IOException {
-        foreachInputItem(inputItem -> {
+        for (InputItem inputItem : inputItems) {
             documentManager.openNewDocument();
             documentManager.addInputItem(inputItem, outputParameters.getCompression());
             documentManager.saveDocument(outputParameters.getUniqueOutputFileName());
-        });
+        }
     }
 
     private void startSingleOutputProcess() throws IOException {
         documentManager.openNewDocument();
 
-        foreachInputItem(inputItem ->
-                documentManager.addInputItem(inputItem, outputParameters.getCompression()));
-
-        if (!stopRequested) {
-            documentManager.saveDocument(outputParameters.getUniqueOutputFileName());
-        }
-    }
-
-    private void foreachInputItem(InputItemProcessor process) throws IOException {
         for (InputItem inputItem : inputItems) {
-            if (stopRequested) {
-                break;
-            }
-
-            process.apply(inputItem);
+            documentManager.addInputItem(inputItem, outputParameters.getCompression());
         }
-    }
 
-    @FunctionalInterface
-    private interface InputItemProcessor {
-        void apply(InputItem inputItem) throws IOException;
+        documentManager.saveDocument(outputParameters.getUniqueOutputFileName());
     }
 }

@@ -51,16 +51,6 @@ public class ProcessOrchestratorTest {
         verify(fakeDocumentManager, atLeast(3)).saveDocument(any());
     }
 
-    @Test
-    public void whenCancelRequestedByUserProcessShouldStop() throws IOException {
-        ProcessOrchestrator processOrchestrator = new ProcessOrchestrator(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
-
-        processOrchestrator.requestStop();
-        processOrchestrator.startProcess();
-
-        verify(fakeDocumentManager, never()).saveDocument(any());
-    }
-
     private static List<InputItem> input(String... localFilePaths) {
         List<InputItem> inputFiles = new ArrayList<>();
         Arrays.stream(localFilePaths).forEach((filepath) -> {

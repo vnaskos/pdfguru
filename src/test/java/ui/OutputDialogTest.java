@@ -1,6 +1,6 @@
 package ui;
 
-import com.vnaskos.pdfguru.ExecutionControlListener;
+import com.vnaskos.pdfguru.ProcessListener;
 import com.vnaskos.pdfguru.ui.OutputDialog;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -15,7 +15,7 @@ public class OutputDialogTest extends AssertJSwingJUnitTestCase {
 
     private static final int TOTAL_ITEMS_TO_PROCESS = 2;
 
-    private final ExecutionControlListener fakeControlListener = mock(ExecutionControlListener.class);
+    private final ProcessListener fakeControlListener = mock(ProcessListener.class);
 
     private FrameFixture window;
     private OutputDialog outputDialog;
@@ -23,7 +23,7 @@ public class OutputDialogTest extends AssertJSwingJUnitTestCase {
     @Override
     protected void onSetUp() {
         outputDialog = GuiActionRunner.execute(() -> new OutputDialog(TOTAL_ITEMS_TO_PROCESS));
-        outputDialog.setExecutionControlListener(fakeControlListener);
+        outputDialog.setProcessListener(fakeControlListener);
         window = new FrameFixture(robot(), outputDialog);
         window.show();
     }

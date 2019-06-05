@@ -1,17 +1,14 @@
 package com.vnaskos.pdfguru.ui;
 
+import com.vnaskos.pdfguru.ProcessListener;
+import com.vnaskos.pdfguru.execution.Process;
 import com.vnaskos.pdfguru.execution.OutputParameters;
-import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
-import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
 import com.vnaskos.pdfguru.input.InputItem;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  *
@@ -23,7 +20,7 @@ public class PDFGuru extends JFrame {
 
     private InputItemJList inputList;
     private JTextField pagesTextField;
-    private JSpinner compressionSpinner;
+    private SpinnerNumberModel compressionModel;
     private JCheckBox multipleFileOutputCheckBox;
     private JTextField outputFilepathField;
 
@@ -32,12 +29,6 @@ public class PDFGuru extends JFrame {
     }
 
     private void initComponents() {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PDFGuru.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setTitle("PDF Guru v0.3.2");
@@ -119,8 +110,13 @@ public class PDFGuru extends JFrame {
 
         JLabel compressionLabel = new JLabel();
         compressionLabel.setText("compression:");
-        compressionSpinner = new JSpinner();
-        compressionSpinner.setModel(new SpinnerNumberModel(Float.valueOf(0.5f), Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(0.1f)));
+
+        compressionModel = new SpinnerNumberModel(
+                Float.valueOf(0.5f), Float.valueOf(0.0f),
+                Float.valueOf(1.0f), Float.valueOf(0.1f));
+
+        JSpinner compressionSpinner = new JSpinner();
+        compressionSpinner.setModel(compressionModel);
 
         multipleFileOutputCheckBox = new JCheckBox();
         multipleFileOutputCheckBox.setText("Export in multiple files");
@@ -259,32 +255,19 @@ public class PDFGuru extends JFrame {
     private void okButtonActionPerformed() {
         List<InputItem> files = inputList.getItems();
 
-        float compression = Float.parseFloat(compressionSpinner.getValue().toString());
-        String output = outputFilepathField.getText();
-        
-        OutputParameters params = new OutputParameters(output);
-        params.setCompression(compression);
+        OutputParameters params = new OutputParameters(outputFilepathField.getText());
+        params.setCompression(compressionModel.getNumber().floatValue());
         if (multipleFileOutputCheckBox.isSelected()) {
             params.setMultiFileOutput();
         }
 
+        ProcessListener process = new Process();
+
         OutputDialog outputDialog = new OutputDialog(files.size());
         outputDialog.setVisible(true);
+        outputDialog.setProcessListener(process);
 
-        PdfboxDocumentManager documentManager = new PdfboxDocumentManager();
-        ProcessOrchestrator handler = new ProcessOrchestrator(documentManager, files, params);
-        documentManager.registerProgressListener(outputDialog);
-
-        outputDialog.setExecutionControlListener(handler);
-
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            try {
-                handler.startProcess();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        process.run(files, params, outputDialog);
     }
 
     private void inputListValueChanged() {
