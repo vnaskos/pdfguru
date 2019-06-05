@@ -1,5 +1,6 @@
-package com.vnaskos.pdfguru.input;
+package com.vnaskos.pdfguru;
 
+import com.vnaskos.pdfguru.InputItem;
 import org.junit.Test;
 
 import java.util.List;

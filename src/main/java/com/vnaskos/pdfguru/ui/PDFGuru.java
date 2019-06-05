@@ -2,8 +2,8 @@ package com.vnaskos.pdfguru.ui;
 
 import com.vnaskos.pdfguru.ProcessListener;
 import com.vnaskos.pdfguru.execution.Process;
-import com.vnaskos.pdfguru.execution.OutputParameters;
-import com.vnaskos.pdfguru.input.InputItem;
+import com.vnaskos.pdfguru.OutputParameters;
+import com.vnaskos.pdfguru.InputItem;
 
 import javax.swing.*;
 import java.io.File;

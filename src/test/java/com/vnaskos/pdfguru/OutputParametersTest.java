@@ -1,5 +1,6 @@
-package com.vnaskos.pdfguru.execution;
+package com.vnaskos.pdfguru;
 
+import com.vnaskos.pdfguru.OutputParameters;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

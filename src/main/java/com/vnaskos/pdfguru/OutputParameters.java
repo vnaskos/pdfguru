@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execution;
+package com.vnaskos.pdfguru;
 
 import java.io.File;
 
@@ -22,7 +22,7 @@ public class OutputParameters {
         this.outputFilePath = outputFilePath;
     }
 
-    String getUniqueOutputFileName() {
+    public String getUniqueOutputFileName() {
         String tmpOutputFilePath = outputFilePath;
 
         if(outputFilePath.toLowerCase().endsWith(".pdf")) {
@@ -41,7 +41,7 @@ public class OutputParameters {
         return (new File(testOut)).exists();
     }
 
-    float getCompression() {
+    public float getCompression() {
         return compression;
     }
 
@@ -59,7 +59,7 @@ public class OutputParameters {
         this.singleFileOutput = false;
     }
 
-    boolean isSingleFileOutput() {
+    public boolean isSingleFileOutput() {
         return singleFileOutput;
     }
 }

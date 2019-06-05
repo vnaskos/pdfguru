@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.input;
+package com.vnaskos.pdfguru;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
