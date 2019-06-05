@@ -38,6 +38,14 @@ public class PDFGuruTest extends AssertJSwingJUnitTestCase {
     }
 
     @Test
+    public void shouldOpenPagesHelpDialogWhenPagesHelpButtonIsClicked() {
+        window.button("pagesHelpButton").click();
+
+        ComponentFinder finder = BasicComponentFinder.finderWithCurrentAwtHierarchy();
+        finder.find(component -> component instanceof JOptionPane).isVisible();
+    }
+
+    @Test
     public void shouldOpenFileChooserWhenAddButtonIsClicked() {
         window.button("addButton").click();
 

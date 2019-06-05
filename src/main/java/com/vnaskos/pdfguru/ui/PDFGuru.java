@@ -96,6 +96,7 @@ public class PDFGuru extends JFrame {
         });
 
         JButton pagesHelpButton = new JButton();
+        pagesHelpButton.setName("pagesHelpButton");
         pagesHelpButton.setText("?");
         pagesHelpButton.addActionListener(evt -> pagesHelpButtonActionPerformed());
 
