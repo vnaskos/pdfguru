@@ -46,6 +46,7 @@ public class PDFGuru extends JFrame {
         inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
 
         inputList = new JList<>();
+        inputList.setName("inputList");
         inputList.setModel(model);
         inputList.addListSelectionListener(evt -> inputListValueChanged());
         JScrollPane inputScrollPane = new JScrollPane();
@@ -57,18 +58,22 @@ public class PDFGuru extends JFrame {
         addButton.addActionListener(evt -> fileBrowser.selectFiles(this::addElements));
 
         JButton upButton = new JButton();
+        upButton.setName("upButton");
         upButton.setText("Up");
         upButton.addActionListener(evt -> moveUp());
 
         JButton downButton = new JButton();
+        downButton.setName("downButton");
         downButton.setText("Down");
         downButton.addActionListener(evt -> moveDown());
 
         JButton removeButton = new JButton();
+        removeButton.setName("removeButton");
         removeButton.setText("Remove");
         removeButton.addActionListener(evt -> removeSelected());
 
         JButton clearButton = new JButton();
+        clearButton.setName("clearButton");
         clearButton.setText("Clear");
         clearButton.addActionListener(evt -> model.removeAllElements());
 
@@ -311,7 +316,7 @@ public class PDFGuru extends JFrame {
         java.awt.EventQueue.invokeLater(() -> new PDFGuru().setVisible(true));
     }
 
-    void addElements(File[] selectedFiles) {
+    public void addElements(File[] selectedFiles) {
         if (selectedFiles == null) {
             return;
         }
@@ -325,6 +330,16 @@ public class PDFGuru extends JFrame {
 
     void addToModel(InputItem item) {
         model.add(model.size(), item);
+    }
+
+    private enum MoveDirection {
+        UP(-1), DOWN(1);
+
+        final int value;
+
+        MoveDirection(int value) {
+            this.value = value;
+        }
     }
 
     private void moveUp() {
@@ -343,16 +358,6 @@ public class PDFGuru extends JFrame {
             selected[i]++;
         }
         inputList.setSelectedIndices(selected);
-    }
-
-    private enum MoveDirection {
-        UP(-1), DOWN(1);
-
-        final int value;
-
-        MoveDirection(int value) {
-            this.value = value;
-        }
     }
     
     private void moveElement(int indexOfSelected, MoveDirection direction) {
