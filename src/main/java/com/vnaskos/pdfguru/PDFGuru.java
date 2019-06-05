@@ -7,6 +7,7 @@ import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.ui.AboutMeFrame;
 import com.vnaskos.pdfguru.ui.OutputDialog;
 
 import javax.swing.*;
@@ -27,7 +28,6 @@ public class PDFGuru extends javax.swing.JFrame {
 
     private final FileChooser fileChooser;
     private final DefaultListModel model;
-    private final AboutForm about;
     
     /**
      * Creates new form PDFGuru
@@ -65,8 +65,6 @@ public class PDFGuru extends javax.swing.JFrame {
                 }
             }
         });
-        
-        about = new AboutForm();
     }
 
     /**
@@ -265,11 +263,7 @@ public class PDFGuru extends javax.swing.JFrame {
         );
 
         jButton1.setText("About");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+        jButton1.addActionListener(evt -> AboutMeFrame.display());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -376,10 +370,6 @@ public class PDFGuru extends javax.swing.JFrame {
         
         JOptionPane.showMessageDialog(this, dialogText);
     }//GEN-LAST:event_pagesHelpButtonActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        about.setVisible(true);
-    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
