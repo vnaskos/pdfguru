@@ -9,17 +9,17 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  *
  * @author Vasilis Naskos
  */
-public class FileChooser {
+public class FileBrowser {
     
     private JFileChooser fileChooser;
     private Container parent;
     private static String lastDir;
     
-    public FileChooser() {
+    public FileBrowser() {
         setupFileChooser();
     }
     
-    public FileChooser(Container parent) {
+    public FileBrowser(Container parent) {
         this();
         
         this.parent = parent;
@@ -54,12 +54,18 @@ public class FileChooser {
         return fileChooser;
     }
     
-    public File[] getSelectedFiles() {
-        if (fileChooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION)
-            return null;
-        
+    public void selectFiles(ChooseFileCallback callback) {
+        if (fileChooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
+            callback.handleSelectedFiles(new File[0]);
+            return;
+        }
+
         lastDir = fileChooser.getSelectedFile().getPath();
-        return fileChooser.getSelectedFiles();
+        callback.handleSelectedFiles(fileChooser.getSelectedFiles());
+    }
+
+    public interface ChooseFileCallback {
+        void handleSelectedFiles(File[] selectedFiles);
     }
     
 }

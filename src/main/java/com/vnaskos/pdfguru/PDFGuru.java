@@ -4,13 +4,14 @@ import com.vnaskos.pdfguru.execution.OutputParameters;
 import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
 import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
 import com.vnaskos.pdfguru.input.DirectoryScanner;
-import com.vnaskos.pdfguru.input.FileChooser;
+import com.vnaskos.pdfguru.input.FileBrowser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import com.vnaskos.pdfguru.ui.AboutMeFrame;
 import com.vnaskos.pdfguru.ui.OutputDialog;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,14 +31,13 @@ public class PDFGuru extends JFrame {
     private JTextField outputFilepathField;
     private JCheckBox multipleFileOutputCheckBox;
 
-    private final FileChooser fileChooser;
+    private final FileBrowser fileBrowser = createFileChooser(this);
     private final DefaultListModel model;
 
     public PDFGuru() {
         initComponents();
         this.setLocationRelativeTo(null);
-        
-        fileChooser = new FileChooser(this);
+
         model = new DefaultListModel();
         inputList.setModel(model);
         
@@ -64,9 +64,12 @@ public class PDFGuru extends JFrame {
         });
     }
 
+    public FileBrowser createFileChooser(Container parent) {
+        return new FileBrowser(parent);
+    }
+
     private void initComponents() {
         JPanel inputPanel = new JPanel();
-        JButton addButton = new JButton();
         JButton upButton = new JButton();
         JButton downButton = new JButton();
         JButton removeButton = new JButton();
@@ -90,8 +93,10 @@ public class PDFGuru extends JFrame {
 
         inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
 
+        JButton addButton = new JButton();
+        addButton.setName("addButton");
         addButton.setText("Add");
-        addButton.addActionListener(evt -> addElements());
+        addButton.addActionListener(evt -> fileBrowser.selectFiles(this::addElements));
 
         upButton.setText("Up");
         upButton.addActionListener(evt -> moveUp());
@@ -293,10 +298,11 @@ public class PDFGuru extends JFrame {
     }
 
     private void pagesHelpButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        String dialogText = "Leave empty for all pages\nUse page numbers "
-                + "separated by comma \"1,2,3\"\nUse number intervals \"1-4\"\n"
-                + "Use | character to group results \"1-4|3-5|3,4\"\n"
-                + "1 is the first page, $ is the last";
+        String dialogText = "Leave empty for all pages\n" +
+                "Use page numbers separated by comma \"1,2,3\"\n" +
+                "Use number intervals \"1-4\"\n" +
+                "Use | character to group results \"1-4|3-5|3,4\"\n" +
+                "1 is the first page, $ is the last";
         
         JOptionPane.showMessageDialog(this, dialogText);
     }
@@ -314,9 +320,7 @@ public class PDFGuru extends JFrame {
         java.awt.EventQueue.invokeLater(() -> new PDFGuru().setVisible(true));
     }
 
-    private void addElements() {
-        File[] selectedFiles = fileChooser.getSelectedFiles();
-
+    private void addElements(File[] selectedFiles) {
         if (selectedFiles == null) {
             return;
         }
@@ -372,7 +376,7 @@ public class PDFGuru extends JFrame {
     }
     
     private void browseOutput() {
-        JFileChooser jChooser = fileChooser.getFileChooser();
+        JFileChooser jChooser = fileBrowser.getFileChooser();
 
         if (jChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
