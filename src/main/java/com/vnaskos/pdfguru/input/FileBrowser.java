@@ -54,7 +54,7 @@ public class FileBrowser {
         return fileChooser;
     }
     
-    public void selectFiles(ChooseFileCallback callback) {
+    public void selectFiles(SelectedFilesCallback callback) {
         if (fileChooser.showOpenDialog(parent) != JFileChooser.APPROVE_OPTION) {
             callback.handleSelectedFiles(new File[0]);
             return;
@@ -62,10 +62,6 @@ public class FileBrowser {
 
         lastDir = fileChooser.getSelectedFile().getPath();
         callback.handleSelectedFiles(fileChooser.getSelectedFiles());
-    }
-
-    public interface ChooseFileCallback {
-        void handleSelectedFiles(File[] selectedFiles);
     }
     
 }
