@@ -5,6 +5,7 @@ import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
 
 /**
  *
@@ -83,7 +84,7 @@ public class OutputDialog extends javax.swing.JFrame implements ExecutionProgres
 
     private void cancelButtonActionPerformed(ActionEvent evt) {
         executionControlListener.requestStop();
-        this.dispose();
+        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
     @Override
