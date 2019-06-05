@@ -7,6 +7,7 @@ import com.vnaskos.pdfguru.input.DirectoryScanner;
 import com.vnaskos.pdfguru.input.FileChooser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.ui.OutputDialog;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;

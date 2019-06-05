@@ -1,6 +1,5 @@
 package com.vnaskos.pdfguru.ui;
 
-import com.vnaskos.pdfguru.OutputDialog;
 import com.vnaskos.pdfguru.execution.ExecutionControlListener;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;

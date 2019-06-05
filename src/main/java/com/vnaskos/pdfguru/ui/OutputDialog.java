@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru;
+package com.vnaskos.pdfguru.ui;
 
 import com.vnaskos.pdfguru.execution.ExecutionControlListener;
 import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
