@@ -27,10 +27,10 @@ class PdfboxImageImporter extends GenericDocumentImporter<PDDocument, PDPage> {
     @Override
     public void addInputItem(InputItem inputItem, float compression) throws ExcecutionException {
         try {
-            BufferedImage image = ImageIO.read(new File(inputItem.getPath()));
+            BufferedImage image = ImageIO.read(new File(inputItem.getFilePath()));
             drawImageOnNewBlankPage(image, compression);
         } catch (IOException ex) {
-            throw new ExcecutionException("[E03] - can't process image " + inputItem.getPath());
+            throw new ExcecutionException("[E03] - can't process image " + inputItem.getFilePath());
         }
     }
 

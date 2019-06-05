@@ -1,5 +1,6 @@
 package com.vnaskos.pdfguru.input.items;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -10,20 +11,20 @@ import java.util.stream.IntStream;
  */
 public class InputItem {
     
-    private final String path;
+    private final String filePath;
     private String pagesPattern;
     
-    public InputItem(String path) {
-        this.path = path;
-        pagesPattern = "";
+    public InputItem(String filePath) {
+        this.filePath = Paths.get(filePath).toAbsolutePath().normalize().toString();
+        this.pagesPattern = "";
     }
 
-    public String getPath() {
-        return path;
+    public String getFilePath() {
+        return filePath;
     }
 
     public boolean isPdf() {
-        String file = this.getPath().toLowerCase();
+        String file = this.getFilePath().toLowerCase();
 
         return file.endsWith(".pdf");
     }
@@ -62,6 +63,6 @@ public class InputItem {
 
     @Override
     public String toString() {
-        return path;
+        return filePath;
     }
 }

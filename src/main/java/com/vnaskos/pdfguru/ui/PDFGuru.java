@@ -4,13 +4,14 @@ import com.vnaskos.pdfguru.execution.OutputParameters;
 import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
 import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
 import com.vnaskos.pdfguru.input.FileBrowser;
-import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -300,11 +301,10 @@ public class PDFGuru extends JFrame {
             return;
         }
 
-        for (File file : selectedFiles) {
-            String path = FilenameUtils.normalize(file.getPath());
-            InputItem item = new InputItem(path);
-            addToModel(item);
-        }
+        Arrays.stream(selectedFiles)
+                .map(File::getPath)
+                .map(InputItem::new)
+                .forEach(this::addToModel);
     }
 
     void addToModel(InputItem item) {
@@ -319,8 +319,7 @@ public class PDFGuru extends JFrame {
         }
 
         if (jChooser.getSelectedFile() != null) {
-            String path = jChooser.getSelectedFile().getPath();
-            path = FilenameUtils.normalize(path);
+            String path = Paths.get(jChooser.getSelectedFile().getPath()).normalize().toString();
             path += path.toLowerCase().endsWith(".pdf") ? "" : ".pdf";
             outputFilepathField.setText(path);
         }

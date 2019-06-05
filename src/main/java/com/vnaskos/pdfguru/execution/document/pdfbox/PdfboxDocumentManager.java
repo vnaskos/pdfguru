@@ -57,7 +57,7 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
 
     @Override
     public void addInputItem(InputItem inputItem, float compression) {
-        progressListeners.forEach(l -> l.updateStatus(inputItem.getPath()));
+        progressListeners.forEach(l -> l.updateStatus(inputItem.getFilePath()));
         try {
             if (inputItem.isPdf()) {
                 pdfImporter.addInputItem(inputItem, compression);
