@@ -4,7 +4,7 @@ import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
 import com.vnaskos.pdfguru.execution.document.DocumentManager;
 import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 

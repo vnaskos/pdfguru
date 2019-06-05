@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.input;
+package com.vnaskos.pdfguru.ui;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

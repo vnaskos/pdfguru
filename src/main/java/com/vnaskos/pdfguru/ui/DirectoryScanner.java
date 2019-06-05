@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.input;
+package com.vnaskos.pdfguru.ui;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ class DirectoryScanner {
             }
         }
 
-        callback.handleArray(supportedFiles.toArray(new File[0]));
+        callback.handleFiles(supportedFiles.toArray(new File[0]));
     }
     
     private static void scanSubDirectories(List<File> supportedFilesAccumulator, File parentFile) {

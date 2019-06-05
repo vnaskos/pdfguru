@@ -3,7 +3,7 @@ package com.vnaskos.pdfguru.execution.document.pdfbox;
 import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
 import com.vnaskos.pdfguru.execution.document.GenericDocumentImporter;
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;

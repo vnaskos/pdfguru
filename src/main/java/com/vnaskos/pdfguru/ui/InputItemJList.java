@@ -1,6 +1,6 @@
 package com.vnaskos.pdfguru.ui;
 
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 
 import javax.swing.*;
 import java.util.Collections;
@@ -75,7 +75,7 @@ class InputItemJList extends JList<InputItem> {
         }
     }
 
-    public List<InputItem> getItems() {
+    List<InputItem> getItems() {
         return Collections.list(model.elements());
     }
 

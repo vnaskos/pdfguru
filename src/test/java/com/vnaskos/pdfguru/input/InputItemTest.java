@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.input.items;
+package com.vnaskos.pdfguru.input;
 
 import org.junit.Test;
 

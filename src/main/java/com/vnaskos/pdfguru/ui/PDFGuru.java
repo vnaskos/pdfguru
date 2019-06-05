@@ -3,14 +3,11 @@ package com.vnaskos.pdfguru.ui;
 import com.vnaskos.pdfguru.execution.OutputParameters;
 import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
 import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
-import com.vnaskos.pdfguru.input.FileBrowser;
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +19,7 @@ import java.util.concurrent.Executors;
  */
 public class PDFGuru extends JFrame {
 
-    private final FileBrowser fileBrowser = createFileChooser(this);
+    private final FileBrowser fileBrowser = createFileChooser();
 
     private InputItemJList inputList;
     private JTextField pagesTextField;
@@ -51,7 +48,7 @@ public class PDFGuru extends JFrame {
         JButton addButton = new JButton();
         addButton.setName("addButton");
         addButton.setText("Add");
-        addButton.addActionListener(evt -> fileBrowser.selectFiles(this::addElements));
+        addButton.addActionListener(evt -> fileBrowser.selectInputFiles(this::addElements));
 
         JButton upButton = new JButton();
         upButton.setName("upButton");
@@ -107,7 +104,7 @@ public class PDFGuru extends JFrame {
 
         JButton outputBrowseButton = new JButton();
         outputBrowseButton.setText("...");
-        outputBrowseButton.addActionListener(evt -> browseOutput());
+        outputBrowseButton.addActionListener(evt -> fileBrowser.selectOutputDirectory(files -> browseOutput(files[0])));
 
         outputFilepathField = new JTextField();
         outputFilepathField.setText(System.getProperty("user.home"));
@@ -247,8 +244,8 @@ public class PDFGuru extends JFrame {
         pack();
     }
 
-    private FileBrowser createFileChooser(Container parent) {
-        return new FileBrowser(parent);
+    private FileBrowser createFileChooser() {
+        return new FileBrowser();
     }
 
     private void okButtonActionPerformed() {
@@ -311,17 +308,11 @@ public class PDFGuru extends JFrame {
         inputList.addItem(item);
     }
     
-    private void browseOutput() {
-        JFileChooser jChooser = fileBrowser.getFileChooser();
-
-        if (jChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+    private void browseOutput(File outputDirectory) {
+        if (outputDirectory == null) {
             return;
         }
 
-        if (jChooser.getSelectedFile() != null) {
-            String path = Paths.get(jChooser.getSelectedFile().getPath()).normalize().toString();
-            path += path.toLowerCase().endsWith(".pdf") ? "" : ".pdf";
-            outputFilepathField.setText(path);
-        }
+        outputFilepathField.setText(outputDirectory.getAbsolutePath() + File.separator);
     }
 }
