@@ -6,15 +6,15 @@ import javax.swing.*;
 import java.util.Collections;
 import java.util.List;
 
-public class InputItemJList extends JList<InputItem> {
+class InputItemJList extends JList<InputItem> {
 
     private final DefaultListModel<InputItem> model = new DefaultListModel<>();
 
-    public InputItemJList() {
+    InputItemJList() {
         this.setModel(model);
     }
 
-    public void addItem(InputItem item) {
+    void addItem(InputItem item) {
         if (item == null) {
             return;
         }
@@ -22,7 +22,7 @@ public class InputItemJList extends JList<InputItem> {
         model.add(model.size(), item);
     }
 
-    public void moveSelectedUp() {
+    void moveSelectedUp() {
         int topIndex = 0;
         if (getMinSelectionIndex() == topIndex) {
             return;
@@ -38,7 +38,7 @@ public class InputItemJList extends JList<InputItem> {
         updateUI();
     }
 
-    public void moveSelectedDown() {
+    void moveSelectedDown() {
         int bottomIndex = model.size()-1;
         if (getMaxSelectionIndex() == bottomIndex) {
             return;
@@ -68,7 +68,7 @@ public class InputItemJList extends JList<InputItem> {
         model.removeAllElements();
     }
 
-    public void removeSelected() {
+    void removeSelected() {
         int[] selected = getSelectedIndices();
         for (int i = selected.length - 1; i >= 0; i--) {
             model.remove(selected[i]);
