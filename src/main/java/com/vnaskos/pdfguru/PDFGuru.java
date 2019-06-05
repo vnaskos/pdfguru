@@ -320,23 +320,32 @@ public class PDFGuru extends JFrame {
         java.awt.EventQueue.invokeLater(() -> new PDFGuru().setVisible(true));
     }
 
-    private void addElements(File[] selectedFiles) {
+    void addElements(File[] selectedFiles) {
         if (selectedFiles == null) {
             return;
         }
 
-        DirectoryScanner scanner = new DirectoryScanner(selectedFiles);
+        DirectoryScanner scanner = getDirectoryScanner(selectedFiles);
         ArrayList<File[]> files = scanner.getFiles();
 
         for (File[] directory : files) {
             for (File file : directory) {
                 String path = FilenameUtils.normalize(file.getPath());
                 InputItem item = new InputItem(path);
-                model.add(model.size(), item);
+                addToModel(item);
             }
         }
     }
-    
+
+    void addToModel(InputItem item) {
+        model.add(model.size(), item);
+    }
+
+    DirectoryScanner getDirectoryScanner(File[] selectedFiles) {
+        return new DirectoryScanner(selectedFiles);
+    }
+
+
     private void moveUp() {
         int[] selected = inputList.getSelectedIndices();
         for (int i = 0; i < selected.length; i++) {
