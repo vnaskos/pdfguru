@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru;
+package com.vnaskos.pdfguru.ui;
 
 import com.vnaskos.pdfguru.execution.OutputParameters;
 import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
@@ -6,9 +6,6 @@ import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
 import com.vnaskos.pdfguru.input.FileBrowser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
-import com.vnaskos.pdfguru.ui.AboutMeFrame;
-import com.vnaskos.pdfguru.ui.InputItemJList;
-import com.vnaskos.pdfguru.ui.OutputDialog;
 
 import javax.swing.*;
 import java.awt.*;
@@ -296,19 +293,6 @@ public class PDFGuru extends JFrame {
                 "1 is the first page, $ is the last";
         
         JOptionPane.showMessageDialog(this, dialogText);
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String... args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PDFGuru.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-
-        java.awt.EventQueue.invokeLater(() -> new PDFGuru().setVisible(true));
     }
 
     public void addElements(File[] selectedFiles) {

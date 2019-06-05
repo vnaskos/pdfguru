@@ -1,6 +1,6 @@
 package ui;
 
-import com.vnaskos.pdfguru.PDFGuru;
+import com.vnaskos.pdfguru.ui.PDFGuru;
 import com.vnaskos.pdfguru.ui.AboutMeFrame;
 import org.assertj.swing.core.BasicComponentFinder;
 import org.assertj.swing.core.ComponentFinder;
@@ -93,4 +93,6 @@ public class PDFGuruTest extends AssertJSwingJUnitTestCase {
         window.button("clearButton").click();
         window.list("inputList").requireItemCount(0);
     }
+
+
 }

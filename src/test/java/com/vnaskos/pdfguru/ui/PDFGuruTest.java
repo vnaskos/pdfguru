@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru;
+package com.vnaskos.pdfguru.ui;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
