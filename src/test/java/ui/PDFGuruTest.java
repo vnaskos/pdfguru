@@ -4,7 +4,6 @@ import com.vnaskos.pdfguru.PDFGuru;
 import com.vnaskos.pdfguru.ui.AboutMeFrame;
 import org.assertj.swing.core.BasicComponentFinder;
 import org.assertj.swing.core.ComponentFinder;
-import org.assertj.swing.core.ComponentMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.FrameFixture;
@@ -12,19 +11,15 @@ import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
 
 import javax.swing.*;
-import java.awt.*;
 import java.util.concurrent.TimeUnit;
-
-import static org.assertj.swing.finder.WindowFinder.findFrame;
 
 public class PDFGuruTest extends AssertJSwingJUnitTestCase {
 
     private FrameFixture window;
-    private PDFGuru pdfGuruFrame;
 
     @Override
     protected void onSetUp() {
-        pdfGuruFrame = GuiActionRunner.execute(PDFGuru::new);
+        PDFGuru pdfGuruFrame = GuiActionRunner.execute(PDFGuru::new);
         window = new FrameFixture(robot(), pdfGuruFrame);
         window.show();
     }
