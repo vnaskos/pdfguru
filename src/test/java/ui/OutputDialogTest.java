@@ -1,6 +1,6 @@
 package ui;
 
-import com.vnaskos.pdfguru.execution.ExecutionControlListener;
+import com.vnaskos.pdfguru.ProcessListener;
 import com.vnaskos.pdfguru.ui.OutputDialog;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
@@ -15,27 +15,28 @@ public class OutputDialogTest extends AssertJSwingJUnitTestCase {
 
     private static final int TOTAL_ITEMS_TO_PROCESS = 2;
 
-    private final ExecutionControlListener fakeControlListener = mock(ExecutionControlListener.class);
+    private final ProcessListener fakeControlListener = mock(ProcessListener.class);
 
     private FrameFixture window;
     private OutputDialog outputDialog;
 
     @Override
     protected void onSetUp() {
-        outputDialog = GuiActionRunner.execute(() -> new OutputDialog(TOTAL_ITEMS_TO_PROCESS, fakeControlListener));
+        outputDialog = GuiActionRunner.execute(() -> new OutputDialog(TOTAL_ITEMS_TO_PROCESS));
+        outputDialog.setProcessListener(fakeControlListener);
         window = new FrameFixture(robot(), outputDialog);
         window.show();
     }
 
     @Test
     public void shouldTriggerCancelEventWhenCancelButtonIsClicked() {
-        window.button("cancelButton").click();
+        window.requireVisible().button("cancelButton").click();
         verify(fakeControlListener, times(1)).requestStop();
     }
 
     @Test
     public void shouldCloseTheFrameWhenCancelButtonIsClicked() {
-        window.button("cancelButton").click();
+        window.requireVisible().button("cancelButton").click();
         Pause.pause(300);
         window.requireNotVisible();
     }

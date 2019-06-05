@@ -1,3 +1,5 @@
+package com.vnaskos.pdfguru;
+
 import com.vnaskos.pdfguru.ui.PDFGuru;
 
 import javax.swing.*;

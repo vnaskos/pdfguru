@@ -3,14 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.vnaskos</groupId>
     <artifactId>PDFGuru</artifactId>
-    <version>0.3.2-SNAPSHOT</version>
+    <version>0.3.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <exec.mainClass>com.vnaskos.pdfguru.ui.PDFGuru</exec.mainClass>
     </properties>
 
     <dependencies>
@@ -54,7 +53,7 @@
                     <archive>
                         <manifest>
                             <mainClass>
-                                com.vnaskos.pdfguru.ui.PDFGuru
+                                com.vnaskos.pdfguru.Main
                             </mainClass>
                         </manifest>
                     </archive>

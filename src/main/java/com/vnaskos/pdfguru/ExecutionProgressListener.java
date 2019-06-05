@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execution.document;
+package com.vnaskos.pdfguru;
 
 public interface ExecutionProgressListener {
 

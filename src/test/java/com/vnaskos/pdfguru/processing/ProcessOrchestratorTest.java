@@ -1,7 +1,8 @@
-package com.vnaskos.pdfguru.execution;
+package com.vnaskos.pdfguru.processing;
 
-import com.vnaskos.pdfguru.execution.document.DocumentManager;
-import com.vnaskos.pdfguru.input.InputItem;
+import com.vnaskos.pdfguru.processing.document.DocumentManager;
+import com.vnaskos.pdfguru.InputItem;
+import com.vnaskos.pdfguru.OutputParameters;
 import org.junit.Test;
 import org.mockito.InOrder;
 
@@ -49,16 +50,6 @@ public class ProcessOrchestratorTest {
         inOrder.verify(fakeDocumentManager).saveDocument(any());
 
         verify(fakeDocumentManager, atLeast(3)).saveDocument(any());
-    }
-
-    @Test
-    public void whenCancelRequestedByUserProcessShouldStop() throws IOException {
-        ProcessOrchestrator processOrchestrator = new ProcessOrchestrator(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
-
-        processOrchestrator.requestStop();
-        processOrchestrator.startProcess();
-
-        verify(fakeDocumentManager, never()).saveDocument(any());
     }
 
     private static List<InputItem> input(String... localFilePaths) {

@@ -1,6 +1,6 @@
-package com.vnaskos.pdfguru.execution.document;
+package com.vnaskos.pdfguru.processing.document;
 
-import com.vnaskos.pdfguru.input.InputItem;
+import com.vnaskos.pdfguru.InputItem;
 
 import java.io.IOException;
 

@@ -1,6 +1,6 @@
 package com.vnaskos.pdfguru.ui;
 
-import com.vnaskos.pdfguru.input.InputItem;
+import com.vnaskos.pdfguru.InputItem;
 
 import javax.swing.*;
 import java.util.Collections;

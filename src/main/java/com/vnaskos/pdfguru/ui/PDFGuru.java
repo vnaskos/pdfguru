@@ -1,17 +1,14 @@
 package com.vnaskos.pdfguru.ui;
 
-import com.vnaskos.pdfguru.execution.OutputParameters;
-import com.vnaskos.pdfguru.execution.ProcessOrchestrator;
-import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
-import com.vnaskos.pdfguru.input.InputItem;
+import com.vnaskos.pdfguru.InputItem;
+import com.vnaskos.pdfguru.OutputParameters;
+import com.vnaskos.pdfguru.ProcessFactory;
+import com.vnaskos.pdfguru.ProcessListener;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  *
@@ -23,9 +20,9 @@ public class PDFGuru extends JFrame {
 
     private InputItemJList inputList;
     private JTextField pagesTextField;
-    private JSpinner compressionSpinner;
+    private SpinnerNumberModel compressionModel;
     private JCheckBox multipleFileOutputCheckBox;
-    private JTextField outputFilepathField;
+    private JTextField outputFilePathField;
 
     public PDFGuru() {
         initComponents();
@@ -34,7 +31,7 @@ public class PDFGuru extends JFrame {
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setTitle("PDF Guru v0.3.2");
+        setTitle("PDF Guru v0.3.3");
 
         JPanel inputPanel = new JPanel();
         inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
@@ -108,18 +105,25 @@ public class PDFGuru extends JFrame {
         outputBrowseButton.setText("...");
         outputBrowseButton.addActionListener(evt -> fileBrowser.selectOutputDirectory(files -> browseOutput(files[0])));
 
-        outputFilepathField = new JTextField();
-        outputFilepathField.setText(System.getProperty("user.home"));
+        outputFilePathField = new JTextField();
+        outputFilePathField.setName("outputFilePathField");
+        outputFilePathField.setText(System.getProperty("user.home"));
 
         JLabel compressionLabel = new JLabel();
         compressionLabel.setText("compression:");
-        compressionSpinner = new JSpinner();
-        compressionSpinner.setModel(new SpinnerNumberModel(Float.valueOf(0.5f), Float.valueOf(0.0f), Float.valueOf(1.0f), Float.valueOf(0.1f)));
+
+        compressionModel = new SpinnerNumberModel(
+                Float.valueOf(0.5f), Float.valueOf(0.0f),
+                Float.valueOf(1.0f), Float.valueOf(0.1f));
+
+        JSpinner compressionSpinner = new JSpinner();
+        compressionSpinner.setModel(compressionModel);
 
         multipleFileOutputCheckBox = new JCheckBox();
         multipleFileOutputCheckBox.setText("Export in multiple files");
 
         JButton okButton = new JButton();
+        okButton.setName("okButton");
         okButton.setText("OK");
         okButton.addActionListener(evt -> okButtonActionPerformed());
 
@@ -168,7 +172,7 @@ public class PDFGuru extends JFrame {
                 .addContainerGap()
                 .addGroup(outputPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addGroup(outputPanelLayout.createSequentialGroup()
-                        .addComponent(outputFilepathField)
+                        .addComponent(outputFilePathField)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(outputBrowseButton, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
                     .addGroup(outputPanelLayout.createSequentialGroup()
@@ -184,7 +188,7 @@ public class PDFGuru extends JFrame {
             .addGroup(outputPanelLayout.createSequentialGroup()
                 .addGroup(outputPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                     .addComponent(outputBrowseButton)
-                    .addComponent(outputFilepathField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addComponent(outputFilePathField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(outputPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                     .addComponent(compressionSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -253,29 +257,19 @@ public class PDFGuru extends JFrame {
     private void okButtonActionPerformed() {
         List<InputItem> files = inputList.getItems();
 
-        float compression = Float.parseFloat(compressionSpinner.getValue().toString());
-        String output = outputFilepathField.getText();
-        
-        OutputParameters params = new OutputParameters(output);
-        params.setCompression(compression);
+        OutputParameters params = new OutputParameters(outputFilePathField.getText());
+        params.setCompression(compressionModel.getNumber().floatValue());
         if (multipleFileOutputCheckBox.isSelected()) {
             params.setMultiFileOutput();
         }
 
-        PdfboxDocumentManager documentManager = new PdfboxDocumentManager();
-        ProcessOrchestrator handler = new ProcessOrchestrator(documentManager, files, params);
-        OutputDialog outputDialog = new OutputDialog(files.size(), handler);
-        outputDialog.setVisible(true);
-        documentManager.registerProgressListener(outputDialog);
+        ProcessListener process = ProcessFactory.newProcess();
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            try {
-                handler.startProcess();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        OutputDialog outputDialog = new OutputDialog(files.size());
+        outputDialog.setVisible(true);
+        outputDialog.setProcessListener(process);
+
+        process.run(files, params, outputDialog);
     }
 
     private void inputListValueChanged() {
@@ -315,6 +309,6 @@ public class PDFGuru extends JFrame {
             return;
         }
 
-        outputFilepathField.setText(outputDirectory.getAbsolutePath() + File.separator);
+        outputFilePathField.setText(outputDirectory.getAbsolutePath() + File.separator);
     }
 }
