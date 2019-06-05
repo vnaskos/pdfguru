@@ -17,7 +17,9 @@ public class DirectoryScannerTest {
     private static Path subDir;
 
     private static File supportedFile;
+    private static File supportedFileInSubDir;
     private static File unsupportedFile;
+    private static File unsupportedFileInSubDir;
 
     private final DirectoryScanner directoryScanner = new DirectoryScanner();
 
@@ -26,29 +28,33 @@ public class DirectoryScannerTest {
         dir = Files.createTempDirectory("pdfguru");
         subDir = Files.createTempDirectory(dir,"pdfguru_subdir");
 
-        supportedFile = File.createTempFile("pdf","guru.pdf", subDir.toFile());
+        supportedFile = File.createTempFile("pdf","guru.pdf", dir.toFile());
+        supportedFileInSubDir = File.createTempFile("pdf", "guru.pdf", subDir.toFile());
         unsupportedFile = File.createTempFile("pdf","guru.unknown", dir.toFile());
+        unsupportedFileInSubDir = File.createTempFile("pdf","guru.unknown", subDir.toFile());
 
         supportedFile.deleteOnExit();
+        supportedFileInSubDir.deleteOnExit();
         unsupportedFile.deleteOnExit();
+        unsupportedFileInSubDir.deleteOnExit();
         subDir.toFile().deleteOnExit();
         dir.toFile().deleteOnExit();
     }
 
     @Test
     public void providingOnlyFilesShouldReturnThatFiles() {
-        File[] selectedFiles = { supportedFile };
+        File[] selectedFiles = { supportedFile, unsupportedFile, supportedFileInSubDir, unsupportedFileInSubDir };
 
         List<File> supportedFiles = directoryScanner.getAllSupportedFiles(selectedFiles);
 
         assertThat(supportedFiles)
                 .contains(supportedFile)
-                .hasSize(1);
+                .hasSize(2);
     }
 
     @Test
     public void providingDirectoriesWithFilesShouldReturnOnlyTheSupportedFilesContained() {
-        File[] selectedFiles = { dir.toFile(), dir.toFile() };
+        File[] selectedFiles = { subDir.toFile(), supportedFile, unsupportedFile };
 
         List<File> supportedFiles = directoryScanner.getAllSupportedFiles(selectedFiles);
 
@@ -59,13 +65,15 @@ public class DirectoryScannerTest {
 
     @Test
     public void providingDirectoriesWithDirectoriesAndFilesShouldReturnAllTheSupportedFilesContained() {
-        File[] selectedFiles = { dir.toFile(), dir.toFile() };
+        File[] selectedFiles = { dir.toFile(), subDir.toFile(),
+                supportedFile, unsupportedFile,
+                supportedFileInSubDir, unsupportedFileInSubDir };
 
         List<File> supportedFiles = directoryScanner.getAllSupportedFiles(selectedFiles);
 
         assertThat(supportedFiles)
                 .contains(supportedFile)
-                .hasSize(2);
+                .hasSize(5);
     }
 
 }
