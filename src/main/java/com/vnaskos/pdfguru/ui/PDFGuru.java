@@ -1,9 +1,9 @@
 package com.vnaskos.pdfguru.ui;
 
-import com.vnaskos.pdfguru.ProcessListener;
-import com.vnaskos.pdfguru.processing.Process;
-import com.vnaskos.pdfguru.OutputParameters;
 import com.vnaskos.pdfguru.InputItem;
+import com.vnaskos.pdfguru.OutputParameters;
+import com.vnaskos.pdfguru.ProcessFactory;
+import com.vnaskos.pdfguru.ProcessListener;
 
 import javax.swing.*;
 import java.io.File;
@@ -261,7 +261,7 @@ public class PDFGuru extends JFrame {
             params.setMultiFileOutput();
         }
 
-        ProcessListener process = new Process();
+        ProcessListener process = ProcessFactory.newProcess();
 
         OutputDialog outputDialog = new OutputDialog(files.size());
         outputDialog.setVisible(true);
