@@ -2,19 +2,16 @@ package ui;
 
 import com.vnaskos.pdfguru.execution.ExecutionControlListener;
 import com.vnaskos.pdfguru.ui.OutputDialog;
-import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.assertj.swing.timing.Pause;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class OutputDialogTest {
+public class OutputDialogTest extends AssertJSwingJUnitTestCase {
 
     private static final int TOTAL_ITEMS_TO_PROCESS = 2;
 
@@ -23,15 +20,10 @@ public class OutputDialogTest {
     private FrameFixture window;
     private OutputDialog outputDialog;
 
-    @BeforeClass
-    public static void setUpOnce() {
-        FailOnThreadViolationRepaintManager.install();
-    }
-
-    @Before
-    public void setUp() {
+    @Override
+    protected void onSetUp() {
         outputDialog = GuiActionRunner.execute(() -> new OutputDialog(TOTAL_ITEMS_TO_PROCESS, fakeControlListener));
-        window = new FrameFixture(outputDialog);
+        window = new FrameFixture(robot(), outputDialog);
         window.show();
     }
 
@@ -72,11 +64,6 @@ public class OutputDialogTest {
     public void shouldChangeCancelButtonToOkWhenJobFinishes() {
         processAllItems();
         assertThat(window.button("cancelButton").text().toLowerCase()).contains("ok");
-    }
-
-    @After
-    public void tearDown() {
-        window.cleanUp();
     }
 
     private void processAllItems() {

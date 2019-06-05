@@ -1,29 +1,21 @@
 package ui;
 
 import com.vnaskos.pdfguru.ui.AboutMeFrame;
-import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AboutMeFrameTest {
+public class AboutMeFrameTest extends AssertJSwingJUnitTestCase {
 
     private FrameFixture window;
 
-    @BeforeClass
-    public static void setUpOnce() {
-        FailOnThreadViolationRepaintManager.install();
-    }
-
-    @Before
-    public void setUp() {
+    @Override
+    protected void onSetUp() {
         AboutMeFrame aboutMeForm = GuiActionRunner.execute(AboutMeFrame::display);
-        window = new FrameFixture(aboutMeForm);
+        window = new FrameFixture(robot(), aboutMeForm);
         window.show();
     }
 
@@ -31,10 +23,5 @@ public class AboutMeFrameTest {
     public void shouldDisplayMyNameWhenWindowIsVisible() {
         window.requireVisible();
         assertThat(window.textBox("infoPane").text()).contains("vnaskos");
-    }
-
-    @After
-    public void tearDown() {
-        window.cleanUp();
     }
 }

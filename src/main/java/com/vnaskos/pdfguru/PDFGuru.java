@@ -32,36 +32,16 @@ public class PDFGuru extends JFrame {
     private JCheckBox multipleFileOutputCheckBox;
 
     private final FileBrowser fileBrowser = createFileChooser(this);
+    private final DirectoryScanner directoryScanner;
     private final DefaultListModel model;
 
     public PDFGuru() {
+        directoryScanner = getDirectoryScanner();
         initComponents();
         this.setLocationRelativeTo(null);
 
         model = new DefaultListModel();
         inputList.setModel(model);
-        
-        jTextField1.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            @Override
-            public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                warn();
-            }
-
-            @Override
-            public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                warn();
-            }
-
-            @Override
-            public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                warn();
-            }
-
-            private void warn() {
-                InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
-                item.setPagesPattern(jTextField1.getText());
-            }
-        });
     }
 
     public FileBrowser createFileChooser(Container parent) {
@@ -112,6 +92,28 @@ public class PDFGuru extends JFrame {
 
         inputList.addListSelectionListener(this::inputListValueChanged);
         inputScrollPane.setViewportView(inputList);
+
+        jTextField1.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                warn();
+            }
+
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                warn();
+            }
+
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                warn();
+            }
+
+            private void warn() {
+                InputItem item = (InputItem) model.get(inputList.getSelectedIndex());
+                item.setPagesPattern(jTextField1.getText());
+            }
+        });
 
         GroupLayout inputPanelLayout = new GroupLayout(inputPanel);
         inputPanel.setLayout(inputPanelLayout);
@@ -325,15 +327,12 @@ public class PDFGuru extends JFrame {
             return;
         }
 
-        DirectoryScanner scanner = getDirectoryScanner(selectedFiles);
-        ArrayList<File[]> files = scanner.getFiles();
+        List<File> files = directoryScanner.getAllSupportedFiles(selectedFiles);
 
-        for (File[] directory : files) {
-            for (File file : directory) {
-                String path = FilenameUtils.normalize(file.getPath());
-                InputItem item = new InputItem(path);
-                addToModel(item);
-            }
+        for (File file : files) {
+            String path = FilenameUtils.normalize(file.getPath());
+            InputItem item = new InputItem(path);
+            addToModel(item);
         }
     }
 
@@ -341,8 +340,8 @@ public class PDFGuru extends JFrame {
         model.add(model.size(), item);
     }
 
-    DirectoryScanner getDirectoryScanner(File[] selectedFiles) {
-        return new DirectoryScanner(selectedFiles);
+    public DirectoryScanner getDirectoryScanner() {
+        return new DirectoryScanner();
     }
 
 

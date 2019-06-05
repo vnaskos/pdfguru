@@ -1,8 +1,9 @@
 package com.vnaskos.pdfguru.input;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -10,32 +11,37 @@ import java.util.ArrayList;
  */
 public class DirectoryScanner {
 
-    private final ArrayList<File> rootDir;
-    private final File[] selectedFiles;
-    
-    public DirectoryScanner(File[] selecedFiles) {
-        this.selectedFiles = selecedFiles;
-        this.rootDir = new ArrayList<File>();
+    private List<File> rootDir;
+    private File[] selectedFiles;
+
+    public DirectoryScanner() {}
+
+    public List<File> getAllSupportedFiles(File[] selectedFiles) {
+        this.selectedFiles = selectedFiles;
+        this.rootDir = new ArrayList<>();
+
+        return getFiles();
     }
-    
-    public ArrayList<File[]> getFiles() {
-        ArrayList<File[]> files = new ArrayList<File[]>();
+
+    private List<File> getFiles() {
+        ArrayList<File> files = new ArrayList<>();
         
         for(File file : selectedFiles)
             files.addAll(getChildren(file));
         
-        files.add(rootDir.toArray(new File[]{}));
+        files.addAll(rootDir);
         
         return files;
     }
     
-    private ArrayList<File[]> getChildren(File parentFile) {
-        ArrayList<File[]> files = new ArrayList<File[]>();
+    private List<File> getChildren(File parentFile) {
+        List<File> files = new ArrayList<>();
         
-        if(isDirectory(parentFile))
+        if(isDirectory(parentFile)) {
             files.addAll(scanDirectory(parentFile));
-        else if(isSupportedFile(parentFile))
-            rootDir.add(parentFile);        
+        } else if(SupportedFileTypes.isSupported(parentFile)) {
+            rootDir.add(parentFile);
+        }
         
         return files;
     }
@@ -44,52 +50,29 @@ public class DirectoryScanner {
         return file.isDirectory();
     }
     
-    private boolean isSupportedFile(File file) {
-        boolean isFile = file.isFile();
-        boolean isSupported = SupportedFileTypes.isSupported(file);
+    private List<File> scanDirectory(File parentFile) {
+        ArrayList<File> directoryFiles = new ArrayList<>();
         
-        return isFile && isSupported;
-    }
-    
-    private ArrayList<File[]> scanDirectory(File parentFile) {
-        ArrayList<File[]> directoryFiles = new ArrayList<File[]>();
+        File[] currentDirFiles = parentFile.listFiles((dir, name) -> {
+            String extension = SupportedFileTypes.getFileExtension(name);
+            return SupportedFileTypes.isSupported(extension);
+        });
+        if(currentDirFiles != null && currentDirFiles.length != 0) {
+            directoryFiles.addAll(Arrays.asList(currentDirFiles));
+        }
         
-        File[] currentDirFiles = getFilesFromDirectory(parentFile);
-        if(currentDirFiles.length != 0)
-            directoryFiles.add(currentDirFiles);
-        
-        File[] subDirectories = getDirectoriesFromDirectory(parentFile);
-        for(File subDir : subDirectories)
-            directoryFiles.addAll(scanDirectory(subDir));
+        File[] subDirectories = parentFile.listFiles((dir, name) -> {
+            String filePath = dir.getPath() + File.separator + name;
+            File checkFile = new File(filePath);
+            return checkFile.isDirectory();
+        });
+        if(subDirectories != null) {
+            for (File subDir : subDirectories) {
+                directoryFiles.addAll(scanDirectory(subDir));
+            }
+        }
         
         return directoryFiles;
-    }
-    
-    private File[] getFilesFromDirectory(File directory) {
-        File[] currentDirFiles = directory.listFiles(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                String extension = SupportedFileTypes.getFileExtension(name);
-                return SupportedFileTypes.isSupported(extension);
-            }
-        });
-        
-        return currentDirFiles;
-    }
-    
-    private File[] getDirectoriesFromDirectory(File directory) {
-        File[] subDirectories = directory.listFiles(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                String filePath = dir.getPath() + File.separator + name;
-                File checkFile = new File(filePath);
-                return checkFile.isDirectory();
-            }
-        });
-        
-        return subDirectories;
     }
     
 }
