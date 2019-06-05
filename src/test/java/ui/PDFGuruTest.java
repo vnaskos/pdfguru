@@ -1,17 +1,20 @@
 package ui;
 
-import com.vnaskos.pdfguru.ui.PDFGuru;
 import com.vnaskos.pdfguru.ui.AboutMeFrame;
+import com.vnaskos.pdfguru.ui.PDFGuru;
 import org.assertj.swing.core.BasicComponentFinder;
 import org.assertj.swing.core.ComponentFinder;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
+import org.assertj.swing.timing.Pause;
 import org.junit.Test;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,5 +113,27 @@ public class PDFGuruTest extends AssertJSwingJUnitTestCase {
         window.list("inputList").requireItemCount(0);
     }
 
+    @Test
+    public void shouldProducePdfWhenOkButtonIsClickedWithCorrectlySetParameters() throws IOException {
+        File outputDir = Files.createTempDirectory("pdfguru").toFile();
+        File expectedResult = new File(outputDir + File.separator + "test_1.pdf");
 
+        expectedResult.deleteOnExit();
+        outputDir.deleteOnExit();
+
+        GuiActionRunner.execute(() -> pdfGuruFrame.addElements(new File[]{
+                new File("src/test/resources/5pages.pdf")
+        }));
+
+        window.textBox("outputFilePathField").setText(outputDir + File.separator + "test");
+
+        window.button("okButton").click();
+        Pause.pause(800);
+
+        assertThat(expectedResult.exists()).isTrue();
+
+        // CLEAN UP
+        assertThat(expectedResult.delete()).isTrue();
+        assertThat(outputDir.delete()).isTrue();
+    }
 }

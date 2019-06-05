@@ -22,7 +22,7 @@ public class PDFGuru extends JFrame {
     private JTextField pagesTextField;
     private SpinnerNumberModel compressionModel;
     private JCheckBox multipleFileOutputCheckBox;
-    private JTextField outputFilepathField;
+    private JTextField outputFilePathField;
 
     public PDFGuru() {
         initComponents();
@@ -105,8 +105,9 @@ public class PDFGuru extends JFrame {
         outputBrowseButton.setText("...");
         outputBrowseButton.addActionListener(evt -> fileBrowser.selectOutputDirectory(files -> browseOutput(files[0])));
 
-        outputFilepathField = new JTextField();
-        outputFilepathField.setText(System.getProperty("user.home"));
+        outputFilePathField = new JTextField();
+        outputFilePathField.setName("outputFilePathField");
+        outputFilePathField.setText(System.getProperty("user.home"));
 
         JLabel compressionLabel = new JLabel();
         compressionLabel.setText("compression:");
@@ -122,6 +123,7 @@ public class PDFGuru extends JFrame {
         multipleFileOutputCheckBox.setText("Export in multiple files");
 
         JButton okButton = new JButton();
+        okButton.setName("okButton");
         okButton.setText("OK");
         okButton.addActionListener(evt -> okButtonActionPerformed());
 
@@ -170,7 +172,7 @@ public class PDFGuru extends JFrame {
                 .addContainerGap()
                 .addGroup(outputPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                     .addGroup(outputPanelLayout.createSequentialGroup()
-                        .addComponent(outputFilepathField)
+                        .addComponent(outputFilePathField)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(outputBrowseButton, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
                     .addGroup(outputPanelLayout.createSequentialGroup()
@@ -186,7 +188,7 @@ public class PDFGuru extends JFrame {
             .addGroup(outputPanelLayout.createSequentialGroup()
                 .addGroup(outputPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                     .addComponent(outputBrowseButton)
-                    .addComponent(outputFilepathField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                    .addComponent(outputFilePathField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(outputPanelLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                     .addComponent(compressionSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -255,7 +257,7 @@ public class PDFGuru extends JFrame {
     private void okButtonActionPerformed() {
         List<InputItem> files = inputList.getItems();
 
-        OutputParameters params = new OutputParameters(outputFilepathField.getText());
+        OutputParameters params = new OutputParameters(outputFilePathField.getText());
         params.setCompression(compressionModel.getNumber().floatValue());
         if (multipleFileOutputCheckBox.isSelected()) {
             params.setMultiFileOutput();
@@ -307,6 +309,6 @@ public class PDFGuru extends JFrame {
             return;
         }
 
-        outputFilepathField.setText(outputDirectory.getAbsolutePath() + File.separator);
+        outputFilePathField.setText(outputDirectory.getAbsolutePath() + File.separator);
     }
 }
