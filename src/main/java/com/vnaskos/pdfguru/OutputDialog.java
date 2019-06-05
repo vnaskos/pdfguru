@@ -101,14 +101,14 @@ public class OutputDialog extends javax.swing.JFrame implements ExecutionProgres
         return processedItems == totalItemsToProcess;
     }
 
+    private void finish() {
+        updateStatus("Completed!");
+        SwingUtilities.invokeLater(() -> cancelButton.setText("OK"));
+    }
+
     @Override
     public void updateStatus(String status) {
         SwingUtilities.invokeLater(() -> logTextArea.setText(
                 String.format("%s\n%s", status, logTextArea.getText())));
-    }
-
-    private void finish() {
-        updateStatus("Completed!");
-        SwingUtilities.invokeLater(() -> cancelButton.setText("OK"));
     }
 }
