@@ -7,13 +7,13 @@ import com.vnaskos.pdfguru.input.FileBrowser;
 import com.vnaskos.pdfguru.input.FilenameUtils;
 import com.vnaskos.pdfguru.input.items.InputItem;
 import com.vnaskos.pdfguru.ui.AboutMeFrame;
+import com.vnaskos.pdfguru.ui.InputItemJList;
 import com.vnaskos.pdfguru.ui.OutputDialog;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,9 +25,8 @@ import java.util.concurrent.Executors;
 public class PDFGuru extends JFrame {
 
     private final FileBrowser fileBrowser = createFileChooser(this);
-    private final DefaultListModel<InputItem> model = new DefaultListModel<>();
 
-    private JList<InputItem> inputList;
+    private InputItemJList inputList;
     private JTextField pagesTextField;
     private JSpinner compressionSpinner;
     private JCheckBox multipleFileOutputCheckBox;
@@ -45,9 +44,8 @@ public class PDFGuru extends JFrame {
         JPanel inputPanel = new JPanel();
         inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
 
-        inputList = new JList<>();
+        inputList = new InputItemJList();
         inputList.setName("inputList");
-        inputList.setModel(model);
         inputList.addListSelectionListener(evt -> inputListValueChanged());
         JScrollPane inputScrollPane = new JScrollPane();
         inputScrollPane.setViewportView(inputList);
@@ -60,22 +58,22 @@ public class PDFGuru extends JFrame {
         JButton upButton = new JButton();
         upButton.setName("upButton");
         upButton.setText("Up");
-        upButton.addActionListener(evt -> moveUp());
+        upButton.addActionListener(evt -> inputList.moveSelectedUp());
 
         JButton downButton = new JButton();
         downButton.setName("downButton");
         downButton.setText("Down");
-        downButton.addActionListener(evt -> moveDown());
+        downButton.addActionListener(evt -> inputList.moveSelectedDown());
 
         JButton removeButton = new JButton();
         removeButton.setName("removeButton");
         removeButton.setText("Remove");
-        removeButton.addActionListener(evt -> removeSelected());
+        removeButton.addActionListener(evt -> inputList.removeSelected());
 
         JButton clearButton = new JButton();
         clearButton.setName("clearButton");
         clearButton.setText("Clear");
-        clearButton.addActionListener(evt -> model.removeAllElements());
+        clearButton.addActionListener(evt -> inputList.removeAll());
 
         JPanel pagesPanel = new JPanel();
         pagesPanel.setBorder(BorderFactory.createTitledBorder("Pages"));
@@ -256,13 +254,10 @@ public class PDFGuru extends JFrame {
     }
 
     private void okButtonActionPerformed() {
-        List<InputItem> files = new ArrayList<>();
+        List<InputItem> files = inputList.getItems();
+
         float compression = Float.parseFloat(compressionSpinner.getValue().toString());
         String output = outputFilepathField.getText();
-        
-        for(int i=0; i<model.getSize(); i++) {
-            files.add(model.get(i));
-        }
         
         OutputParameters params = new OutputParameters(output);
         params.setCompression(compression);
@@ -329,55 +324,7 @@ public class PDFGuru extends JFrame {
     }
 
     void addToModel(InputItem item) {
-        model.add(model.size(), item);
-    }
-
-    private enum MoveDirection {
-        UP(-1), DOWN(1);
-
-        final int value;
-
-        MoveDirection(int value) {
-            this.value = value;
-        }
-    }
-
-    private void moveUp() {
-        int[] selected = inputList.getSelectedIndices();
-        for (int i = 0; i < selected.length; i++) {
-            moveElement(selected[i], MoveDirection.UP);
-            selected[i]--;
-        }
-        inputList.setSelectedIndices(selected);
-    }
-    
-    private void moveDown() {
-        int[] selected = inputList.getSelectedIndices();
-        for (int i = selected.length - 1; i >= 0; i--) {
-            moveElement(selected[i], MoveDirection.DOWN);
-            selected[i]++;
-        }
-        inputList.setSelectedIndices(selected);
-    }
-    
-    private void moveElement(int indexOfSelected, MoveDirection direction) {
-        swapElements(indexOfSelected, indexOfSelected + direction.value);
-        indexOfSelected = indexOfSelected + direction.value;
-        inputList.setSelectedIndex(indexOfSelected);
-        inputList.updateUI();
-    }
-    
-    private void swapElements(int pos1, int pos2) {
-        InputItem tmp = model.get(pos1);
-        model.set(pos1, model.get(pos2));
-        model.set(pos2, tmp);
-    }
-
-    private void removeSelected() {
-        int[] selected = inputList.getSelectedIndices();
-        for (int i = selected.length - 1; i >= 0; i--) {
-            model.remove(selected[i]);
-        }
+        inputList.addItem(item);
     }
     
     private void browseOutput() {
