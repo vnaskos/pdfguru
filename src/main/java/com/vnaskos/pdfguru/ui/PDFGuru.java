@@ -1,7 +1,7 @@
 package com.vnaskos.pdfguru.ui;
 
 import com.vnaskos.pdfguru.ProcessListener;
-import com.vnaskos.pdfguru.execution.Process;
+import com.vnaskos.pdfguru.processing.Process;
 import com.vnaskos.pdfguru.OutputParameters;
 import com.vnaskos.pdfguru.InputItem;
 

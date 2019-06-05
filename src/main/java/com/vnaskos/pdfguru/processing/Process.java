@@ -1,8 +1,8 @@
-package com.vnaskos.pdfguru.execution;
+package com.vnaskos.pdfguru.processing;
 
 import com.vnaskos.pdfguru.ExecutionProgressListener;
 import com.vnaskos.pdfguru.ProcessListener;
-import com.vnaskos.pdfguru.execution.document.pdfbox.PdfboxDocumentManager;
+import com.vnaskos.pdfguru.processing.document.pdfbox.PdfboxDocumentManager;
 import com.vnaskos.pdfguru.InputItem;
 import com.vnaskos.pdfguru.OutputParameters;
 

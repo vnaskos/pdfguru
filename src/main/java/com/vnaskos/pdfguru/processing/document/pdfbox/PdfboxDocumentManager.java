@@ -1,8 +1,8 @@
-package com.vnaskos.pdfguru.execution.document.pdfbox;
+package com.vnaskos.pdfguru.processing.document.pdfbox;
 
 import com.vnaskos.pdfguru.exception.ExcecutionException;
-import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
-import com.vnaskos.pdfguru.execution.document.DocumentManager;
+import com.vnaskos.pdfguru.processing.document.DocumentControlListener;
+import com.vnaskos.pdfguru.processing.document.DocumentManager;
 import com.vnaskos.pdfguru.ExecutionProgressListener;
 import com.vnaskos.pdfguru.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;

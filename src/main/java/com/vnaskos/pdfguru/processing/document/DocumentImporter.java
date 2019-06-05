@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execution.document;
+package com.vnaskos.pdfguru.processing.document;
 
 import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.InputItem;

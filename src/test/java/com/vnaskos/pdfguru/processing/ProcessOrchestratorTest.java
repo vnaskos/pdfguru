@@ -1,6 +1,6 @@
-package com.vnaskos.pdfguru.execution;
+package com.vnaskos.pdfguru.processing;
 
-import com.vnaskos.pdfguru.execution.document.DocumentManager;
+import com.vnaskos.pdfguru.processing.document.DocumentManager;
 import com.vnaskos.pdfguru.InputItem;
 import com.vnaskos.pdfguru.OutputParameters;
 import org.junit.Test;

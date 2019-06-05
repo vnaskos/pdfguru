@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.execution.document.pdfbox;
+package com.vnaskos.pdfguru.processing.document.pdfbox;
 
 import com.vnaskos.pdfguru.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
