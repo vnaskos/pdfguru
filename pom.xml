@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.vnaskos</groupId>
     <artifactId>PDFGuru</artifactId>
-    <version>0.3.1-SNAPSHOT</version>
+    <version>0.3.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <exec.mainClass>com.vnaskos.pdfguru.PDFGuru</exec.mainClass>
+        <exec.mainClass>com.vnaskos.pdfguru.ui.PDFGuru</exec.mainClass>
     </properties>
 
     <dependencies>
@@ -38,7 +38,12 @@
             <version>2.28.2</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-swing-junit</artifactId>
+            <version>3.9.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -49,7 +54,7 @@
                     <archive>
                         <manifest>
                             <mainClass>
-                                com.vnaskos.pdfguru.PDFGuru
+                                com.vnaskos.pdfguru.ui.PDFGuru
                             </mainClass>
                         </manifest>
                     </archive>

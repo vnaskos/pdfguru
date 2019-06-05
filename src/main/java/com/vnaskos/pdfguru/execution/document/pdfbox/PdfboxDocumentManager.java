@@ -4,7 +4,7 @@ import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
 import com.vnaskos.pdfguru.execution.document.DocumentManager;
 import com.vnaskos.pdfguru.execution.document.ExecutionProgressListener;
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 
@@ -57,7 +57,7 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
 
     @Override
     public void addInputItem(InputItem inputItem, float compression) {
-        progressListeners.forEach(l -> l.updateStatus(inputItem.getPath()));
+        progressListeners.forEach(l -> l.updateStatus(inputItem.getFilePath()));
         try {
             if (inputItem.isPdf()) {
                 pdfImporter.addInputItem(inputItem, compression);
@@ -68,11 +68,6 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
             progressListeners.forEach(l -> l.updateStatus(e.getMessage()));
         }
         progressListeners.forEach(ExecutionProgressListener::incrementProgress);
-    }
-
-    @Override
-    public void notifyFinish() {
-        progressListeners.forEach(ExecutionProgressListener::finish);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.vnaskos.pdfguru.execution;
 
 import com.vnaskos.pdfguru.execution.document.DocumentManager;
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 import org.junit.Test;
 import org.mockito.InOrder;
 
@@ -59,7 +59,6 @@ public class ProcessOrchestratorTest {
         processOrchestrator.startProcess();
 
         verify(fakeDocumentManager, never()).saveDocument(any());
-        verify(fakeDocumentManager, times(1)).notifyFinish();
     }
 
     private static List<InputItem> input(String... localFilePaths) {

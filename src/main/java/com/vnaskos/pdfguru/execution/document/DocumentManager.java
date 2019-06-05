@@ -1,10 +1,10 @@
 package com.vnaskos.pdfguru.execution.document;
 
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 
 import java.io.IOException;
 
-public interface DocumentManager extends Finishable {
+public interface DocumentManager {
 
     void openNewDocument();
 

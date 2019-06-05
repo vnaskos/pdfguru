@@ -3,7 +3,7 @@ package com.vnaskos.pdfguru.execution.document.pdfbox;
 import com.vnaskos.pdfguru.exception.ExcecutionException;
 import com.vnaskos.pdfguru.execution.document.DocumentControlListener;
 import com.vnaskos.pdfguru.execution.document.GenericDocumentImporter;
-import com.vnaskos.pdfguru.input.items.InputItem;
+import com.vnaskos.pdfguru.input.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -23,12 +23,12 @@ class PdfboxPdfImporter extends GenericDocumentImporter<PDDocument, PDPage> {
     @Override
     public void addInputItem(InputItem inputItem, float compression) throws ExcecutionException {
         try {
-            PDDocument sourcePdf = readDocument(inputItem.getPath());
+            PDDocument sourcePdf = readDocument(inputItem.getFilePath());
             importSelectedPages(sourcePdf, inputItem.getSelectedPages(sourcePdf.getNumberOfPages()));
         } catch (InvalidPasswordException ex) {
-            throw new ExcecutionException("[E02] - skip encrypted! " + inputItem.getPath());
+            throw new ExcecutionException("[E02] - skip encrypted! " + inputItem.getFilePath());
         } catch (IOException ex) {
-            throw new ExcecutionException("[E01] - can't process " + inputItem.getPath());
+            throw new ExcecutionException("[E01] - can't process " + inputItem.getFilePath());
         }
     }
 
