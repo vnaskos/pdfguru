@@ -9,20 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SupportedFileTypesTest {
 
     @Test
-    public void pdfExtensionShouldBeASupportedFileType() {
-        String pdfFileExtension = "pdf";
-        boolean isPdfSupported = SupportedFileTypes.isSupported(pdfFileExtension);
-        assertThat(isPdfSupported).isTrue();
-    }
-
-    @Test
-    public void anUnknownFileExtensionShouldNotBeASupportedFileType() {
-        String unknownFileExtension = "UNKNOWN";
-        boolean isUnknownSupported = SupportedFileTypes.isSupported(unknownFileExtension);
-        assertThat(isUnknownSupported).isFalse();
-    }
-
-    @Test
     public void fileWithPdfExtensionShouldBeASupportedFile() {
         File pdf = new File("/providing/a.pdf");
         boolean isPdfFileSupported = SupportedFileTypes.isSupported(pdf);

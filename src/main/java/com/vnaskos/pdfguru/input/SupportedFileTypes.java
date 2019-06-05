@@ -15,19 +15,13 @@ public class SupportedFileTypes {
             "tiff", "tif", "gif", "psd",
             "tga", "pdf"));
 
-    public static boolean isSupported(String fileType) {
-        return supportedInputExtensions.contains(fileType.toLowerCase());
-    }
-    
     public static boolean isSupported(File file) {
-        String extension = getFileExtension(file.getAbsolutePath());
-        
-        return isSupported(extension);
-    }
-    
-    public static String getFileExtension(String filepath) {
-        int indexOfExtension = filepath.lastIndexOf('.') + 1;
+        String filepath = file.getAbsolutePath();
 
-        return filepath.substring(indexOfExtension);
+        int indexOfExtension = filepath.lastIndexOf('.') + 1;
+        String extension = filepath.substring(indexOfExtension).toLowerCase();
+
+        return supportedInputExtensions.contains(extension);
     }
+
 }

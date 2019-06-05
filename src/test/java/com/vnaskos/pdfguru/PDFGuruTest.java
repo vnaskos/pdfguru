@@ -2,12 +2,15 @@ package com.vnaskos.pdfguru;
 
 import com.vnaskos.pdfguru.input.DirectoryScanner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.File;
 import java.util.Arrays;
 
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PDFGuruTest {
 
     private static final File[] THREE_INPUT_FILES = {
@@ -17,12 +20,13 @@ public class PDFGuruTest {
     };
     private static final File[] NO_FILES = new File[0];
 
+    private final PDFGuru pdfGuruSpy = spy(new PDFGuru());
+
     @Test
     public void addFilesShouldPopulateTheListModel() {
         DirectoryScanner fakeDirectoryScanner = mock(DirectoryScanner.class);
-        doReturn(Arrays.asList(THREE_INPUT_FILES)).when(fakeDirectoryScanner).getAllSupportedFiles(any());
-        PDFGuru pdfGuruSpy = spy(new PDFGuru());
         doReturn(fakeDirectoryScanner).when(pdfGuruSpy).getDirectoryScanner();
+        doReturn(Arrays.asList(THREE_INPUT_FILES)).when(fakeDirectoryScanner).getAllSupportedFiles(any());
 
         pdfGuruSpy.addElements(THREE_INPUT_FILES);
 
@@ -31,7 +35,6 @@ public class PDFGuruTest {
 
     @Test
     public void addFilesWithoutProvidingAnyShouldNotThrowOrPopulateModel() {
-        final PDFGuru pdfGuruSpy = spy(new PDFGuru());
         pdfGuruSpy.addElements(null);
         pdfGuruSpy.addElements(NO_FILES);
         verify(pdfGuruSpy, never()).addToModel(any());
