@@ -33,7 +33,7 @@ public class PDFGuru extends JFrame {
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setTitle("PDF Guru v0.3.3");
+        setTitle("PDF Guru v0.3.4");
 
         JPanel inputPanel = new JPanel();
         inputPanel.setBorder(BorderFactory.createTitledBorder("Input"));
