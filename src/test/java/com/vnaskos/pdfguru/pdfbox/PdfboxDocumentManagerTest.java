@@ -1,6 +1,7 @@
-package com.vnaskos.pdfguru.processing.document.pdfbox;
+package com.vnaskos.pdfguru.pdfbox;
 
 import com.vnaskos.pdfguru.InputItem;
+import com.vnaskos.pdfguru.exception.ExecutionException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.Before;
@@ -27,13 +28,14 @@ public class PdfboxDocumentManagerTest {
 
     @Before
     public void setup() {
-        doReturn(fakeDoc).when(managerSpy).createNewDocument();
+        when(managerSpy.createNewDocument()).thenReturn(fakeDoc);
 
         managerSpy.openNewDocument();
     }
 
     @Test
-    public void saveShouldCloseDocumentAndCleanupResourcesWithoutThrowingException() throws IOException {
+    public void saveShouldCloseDocumentAndCleanupResourcesWithoutThrowingException()
+            throws IOException, ExecutionException {
         // intentionally added 2 PDFs to check that their documents will also close
         managerSpy.addInputItem(SAMPLE_5_PAGES_PDF, ANY_COMPRESSION);
         managerSpy.addInputItem(SAMPLE_5_PAGES_PDF, ANY_COMPRESSION);
@@ -44,21 +46,21 @@ public class PdfboxDocumentManagerTest {
     }
 
     @Test
-    public void addPdfWithoutAnyPageSelectionRuleToTheNewDocumentShouldCopyAllPages() throws IOException {
+    public void addPdfWithoutAnyPageSelectionRuleToTheNewDocumentShouldCopyAllPages()
+            throws IOException, ExecutionException {
         managerSpy.addInputItem(SAMPLE_5_PAGES_PDF, ANY_COMPRESSION);
 
         verify(managerSpy, times(5)).addPage(any());
     }
 
-    @Test
-    public void addEncryptedPdfWithoutAnyPageSelectionRuleShouldNotAddAnyPage() throws IOException {
+    @Test(expected = ExecutionException.class)
+    public void addEncryptedPdfWithoutAnyPageSelectionRuleShouldThrow() throws ExecutionException {
         managerSpy.addInputItem(ENCRYPTED_5_PAGES_PDF, ANY_COMPRESSION);
-
-        verify(managerSpy, never()).addPage(any());
     }
 
     @Test
-    public void addImageShouldCreateAddNewPageWithSameDimensionsOnTheFinalDocument() throws IOException {
+    public void addImageShouldCreateAddNewPageWithSameDimensionsOnTheFinalDocument()
+            throws IOException, ExecutionException {
         PdfboxDocumentManager managerSpyWithRealDoc = spy(PdfboxDocumentManager.class);
         managerSpyWithRealDoc.openNewDocument();
 
@@ -72,27 +74,18 @@ public class PdfboxDocumentManagerTest {
         assertThat(imagePage.getMediaBox().getHeight()).isEqualTo(128.0f);
     }
 
-    @Test
-    public void addImageUnableToLoadShouldContinueProcessWithoutAddingAnyPage() {
-        PDDocument docSpy = spy(PDDocument.class);
-        PdfboxDocumentManager managerSpyWithRealDoc = spy(PdfboxDocumentManager.class);
-        doReturn(docSpy).when(managerSpyWithRealDoc).createNewDocument();
-        managerSpyWithRealDoc.openNewDocument();
-
+    @Test(expected = ExecutionException.class)
+    public void addImageUnableToLoadShouldThrow() throws ExecutionException {
         InputItem nonExistingImage = new InputItem("/NON-EXISTING/IMAGE.jpg");
 
-        managerSpyWithRealDoc.addInputItem(nonExistingImage, ANY_COMPRESSION);
-
-        assertThat(docSpy.getNumberOfPages()).isEqualTo(0);
+        managerSpy.addInputItem(nonExistingImage, ANY_COMPRESSION);
     }
 
-    @Test
-    public void addPdfUnableToLoadShouldContinueProcessWithoutAddingAnyPage() throws IOException {
+    @Test(expected = ExecutionException.class)
+    public void addPdfUnableToLoadShouldThrow() throws ExecutionException {
         InputItem nonExistingPdf = new InputItem("/NON-EXISTING/PDF.pdf");
 
         managerSpy.addInputItem(nonExistingPdf, ANY_COMPRESSION);
-
-        verify(managerSpy, never()).addPage(any());
     }
 
     private static InputItem input(String localFilePath) {

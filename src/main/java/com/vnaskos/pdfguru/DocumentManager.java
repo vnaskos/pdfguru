@@ -1,6 +1,6 @@
-package com.vnaskos.pdfguru.processing.document;
+package com.vnaskos.pdfguru;
 
-import com.vnaskos.pdfguru.InputItem;
+import com.vnaskos.pdfguru.exception.ExecutionException;
 
 import java.io.IOException;
 
@@ -12,6 +12,6 @@ public interface DocumentManager {
 
     void closeDocument() throws IOException;
 
-    void addInputItem(InputItem inputItem, float compression);
+    void addInputItem(InputItem inputItem, float compression) throws ExecutionException;
 
 }

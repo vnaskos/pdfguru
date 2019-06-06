@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.processing.document;
+package com.vnaskos.pdfguru;
 
 public abstract class GenericDocumentImporter<DOCUMENT, PAGE> implements DocumentImporter {
 
