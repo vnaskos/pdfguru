@@ -8,6 +8,7 @@ import javax.swing.*;
 public class Main {
 
     private final ProcessFactory processFactory = new PdfboxProcessFactory();
+//    private final ProcessFactory processFactory = new ITextProcessFactory();
 
     private PDFGuru mainWindow;
 
@@ -16,8 +17,7 @@ public class Main {
     }
 
     public static void main(String... args) throws Exception {
-        Main main = new Main();
-        main.setProcessFactory();
+        new Main();
     }
 
     private void startUserInterface() throws Exception {
@@ -25,10 +25,7 @@ public class Main {
         java.awt.EventQueue.invokeLater(() -> {
             mainWindow = new PDFGuru();
             mainWindow.setVisible(true);
+            mainWindow.setProcessFactory(processFactory);
         });
-    }
-
-    private void setProcessFactory() {
-        mainWindow.setProcessFactory(processFactory);
     }
 }
