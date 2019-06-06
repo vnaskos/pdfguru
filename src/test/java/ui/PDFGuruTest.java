@@ -1,5 +1,6 @@
 package ui;
 
+import com.vnaskos.pdfguru.pdfbox.PdfboxProcessFactory;
 import com.vnaskos.pdfguru.ui.AboutMeFrame;
 import com.vnaskos.pdfguru.ui.PDFGuru;
 import org.assertj.swing.core.BasicComponentFinder;
@@ -115,6 +116,8 @@ public class PDFGuruTest extends AssertJSwingJUnitTestCase {
 
     @Test
     public void shouldProducePdfWhenOkButtonIsClickedWithCorrectlySetParameters() throws IOException {
+        pdfGuruFrame.setProcessFactory(new PdfboxProcessFactory());
+
         File outputDir = Files.createTempDirectory("pdfguru").toFile();
         File expectedResult = new File(outputDir + File.separator + "test_1.pdf");
 

@@ -18,6 +18,8 @@ public class PDFGuru extends JFrame {
 
     private final FileBrowser fileBrowser = createFileChooser();
 
+    private ProcessFactory processFactory;
+
     private InputItemJList inputList;
     private JTextField pagesTextField;
     private SpinnerNumberModel compressionModel;
@@ -254,22 +256,25 @@ public class PDFGuru extends JFrame {
         return new FileBrowser();
     }
 
+    public void setProcessFactory(ProcessFactory processFactory) {
+        this.processFactory = processFactory;
+    }
+
     private void okButtonActionPerformed() {
         List<InputItem> files = inputList.getItems();
 
-        OutputParameters params = new OutputParameters(outputFilePathField.getText());
-        params.setCompression(compressionModel.getNumber().floatValue());
+        OutputParameters outputParams = new OutputParameters(outputFilePathField.getText());
+        outputParams.setCompression(compressionModel.getNumber().floatValue());
         if (multipleFileOutputCheckBox.isSelected()) {
-            params.setMultiFileOutput();
+            outputParams.setMultiFileOutput();
         }
-
-        ProcessListener process = ProcessFactory.newProcess();
 
         OutputDialog outputDialog = new OutputDialog(files.size());
         outputDialog.setVisible(true);
-        outputDialog.setProcessListener(process);
 
-        process.run(files, params, outputDialog);
+        ProcessListener process = processFactory.newProcess(files, outputParams, outputDialog);
+        outputDialog.setProcessListener(process);
+        process.run();
     }
 
     private void inputListValueChanged() {

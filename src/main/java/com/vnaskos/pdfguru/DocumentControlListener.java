@@ -1,4 +1,4 @@
-package com.vnaskos.pdfguru.processing.document;
+package com.vnaskos.pdfguru;
 
 import java.io.IOException;
 

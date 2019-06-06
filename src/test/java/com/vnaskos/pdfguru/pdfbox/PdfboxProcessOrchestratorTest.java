@@ -1,8 +1,6 @@
-package com.vnaskos.pdfguru.processing;
+package com.vnaskos.pdfguru.pdfbox;
 
-import com.vnaskos.pdfguru.processing.document.DocumentManager;
-import com.vnaskos.pdfguru.InputItem;
-import com.vnaskos.pdfguru.OutputParameters;
+import com.vnaskos.pdfguru.*;
 import org.junit.Test;
 import org.mockito.InOrder;
 
@@ -15,9 +13,10 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ProcessOrchestratorTest {
+public class PdfboxProcessOrchestratorTest {
 
     private final DocumentManager fakeDocumentManager = mock(DocumentManager.class);
+    private final ProcessEventListener fakeProcessEventListener = mock(ProcessEventListener.class);
 
     private static final List<InputItem> SINGLE_FILE_INPUT = input("src/test/resources/5pages.pdf");
     private static final List<InputItem> THREE_FILES_INPUT = input(
@@ -29,25 +28,31 @@ public class ProcessOrchestratorTest {
 
     @Test
     public void saveLocalInputItemToSinglePdf() throws IOException {
-        ProcessOrchestrator processOrchestrator = new ProcessOrchestrator(fakeDocumentManager, SINGLE_FILE_INPUT, fakeOutput);
+        ProcessOrchestrator processOrchestrator =
+                new PdfboxProcessOrchestrator(fakeDocumentManager, SINGLE_FILE_INPUT, fakeOutput);
 
-        processOrchestrator.startProcess();
+        processOrchestrator.startProcess(fakeProcessEventListener);
 
-        InOrder inOrder = inOrder(fakeDocumentManager);
+        InOrder inOrder = inOrder(fakeDocumentManager, fakeProcessEventListener);
         inOrder.verify(fakeDocumentManager, atLeastOnce()).openNewDocument();
+        inOrder.verify(fakeProcessEventListener, times(1)).started(any());
+        inOrder.verify(fakeProcessEventListener, times(1)).done();
         inOrder.verify(fakeDocumentManager, times(1)).saveDocument(any());
     }
 
     @Test
     public void saveMultipleLocalInputItemsToIndividualPdfOneForEachInput() throws IOException {
         fakeOutput.setMultiFileOutput();
-        ProcessOrchestrator processOrchestrator = new ProcessOrchestrator(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
+        ProcessOrchestrator processOrchestrator =
+                new PdfboxProcessOrchestrator(fakeDocumentManager, THREE_FILES_INPUT, fakeOutput);
 
-        processOrchestrator.startProcess();
+        processOrchestrator.startProcess(fakeProcessEventListener);
 
-        InOrder inOrder = inOrder(fakeDocumentManager);
+        InOrder inOrder = inOrder(fakeDocumentManager, fakeProcessEventListener);
+        inOrder.verify(fakeProcessEventListener).started(any());
         inOrder.verify(fakeDocumentManager).openNewDocument();
         inOrder.verify(fakeDocumentManager).saveDocument(any());
+        inOrder.verify(fakeProcessEventListener).done();
 
         verify(fakeDocumentManager, atLeast(3)).saveDocument(any());
     }

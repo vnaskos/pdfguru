@@ -1,10 +1,9 @@
-package com.vnaskos.pdfguru.processing.document.pdfbox;
+package com.vnaskos.pdfguru.pdfbox;
 
-import com.vnaskos.pdfguru.exception.ExcecutionException;
-import com.vnaskos.pdfguru.processing.document.DocumentControlListener;
-import com.vnaskos.pdfguru.processing.document.DocumentManager;
-import com.vnaskos.pdfguru.ExecutionProgressListener;
+import com.vnaskos.pdfguru.DocumentControlListener;
+import com.vnaskos.pdfguru.DocumentManager;
 import com.vnaskos.pdfguru.InputItem;
+import com.vnaskos.pdfguru.exception.ExecutionException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 
@@ -14,7 +13,6 @@ import java.util.List;
 
 public class PdfboxDocumentManager implements DocumentManager, DocumentControlListener<PDDocument, PDPage> {
 
-    private final List<ExecutionProgressListener> progressListeners = new ArrayList<>();
     private final List<PDDocument> pdfSourcesNotToBeGCd = new ArrayList<>();
 
     private final PdfboxImageImporter imageImporter;
@@ -22,13 +20,9 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
 
     private PDDocument outputDocument;
 
-    public PdfboxDocumentManager() {
+    PdfboxDocumentManager() {
         imageImporter = new PdfboxImageImporter(this);
         pdfImporter = new PdfboxPdfImporter(this);
-    }
-
-    public void registerProgressListener(ExecutionProgressListener listener) {
-        progressListeners.add(listener);
     }
 
     PDDocument createNewDocument() {
@@ -56,18 +50,12 @@ public class PdfboxDocumentManager implements DocumentManager, DocumentControlLi
     }
 
     @Override
-    public void addInputItem(InputItem inputItem, float compression) {
-        progressListeners.forEach(l -> l.updateStatus(inputItem.getFilePath()));
-        try {
-            if (inputItem.isPdf()) {
-                pdfImporter.addInputItem(inputItem, compression);
-            } else {
-                imageImporter.addInputItem(inputItem, compression);
-            }
-        } catch (ExcecutionException e) {
-            progressListeners.forEach(l -> l.updateStatus(e.getMessage()));
+    public void addInputItem(InputItem inputItem, float compression) throws ExecutionException {
+        if (inputItem.isPdf()) {
+            pdfImporter.addInputItem(inputItem, compression);
+        } else {
+            imageImporter.addInputItem(inputItem, compression);
         }
-        progressListeners.forEach(ExecutionProgressListener::incrementProgress);
     }
 
     @Override

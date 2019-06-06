@@ -1,11 +1,11 @@
 package com.vnaskos.pdfguru;
 
-import com.vnaskos.pdfguru.processing.Process;
+import java.util.List;
 
-public class ProcessFactory {
+public interface ProcessFactory {
 
-    public static ProcessListener newProcess() {
-        return new Process();
-    }
+    ProcessListener newProcess(List<InputItem> input,
+                               OutputParameters outputParameters,
+                               ExecutionProgressListener progressListener);
 
 }

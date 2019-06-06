@@ -1,18 +1,34 @@
 package com.vnaskos.pdfguru;
 
+import com.vnaskos.pdfguru.pdfbox.PdfboxProcessFactory;
 import com.vnaskos.pdfguru.ui.PDFGuru;
 
 import javax.swing.*;
 
 public class Main {
 
-    public static void main(String... args) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PDFGuru.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
+    private final ProcessFactory processFactory = new PdfboxProcessFactory();
 
-        java.awt.EventQueue.invokeLater(() -> new PDFGuru().setVisible(true));
+    private PDFGuru mainWindow;
+
+    private Main() throws Exception {
+        startUserInterface();
+    }
+
+    public static void main(String... args) throws Exception {
+        Main main = new Main();
+        main.setProcessFactory();
+    }
+
+    private void startUserInterface() throws Exception {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        java.awt.EventQueue.invokeLater(() -> {
+            mainWindow = new PDFGuru();
+            mainWindow.setVisible(true);
+        });
+    }
+
+    private void setProcessFactory() {
+        mainWindow.setProcessFactory(processFactory);
     }
 }

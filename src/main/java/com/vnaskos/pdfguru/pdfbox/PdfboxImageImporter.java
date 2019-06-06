@@ -1,8 +1,8 @@
-package com.vnaskos.pdfguru.processing.document.pdfbox;
+package com.vnaskos.pdfguru.pdfbox;
 
-import com.vnaskos.pdfguru.exception.ExcecutionException;
-import com.vnaskos.pdfguru.processing.document.DocumentControlListener;
-import com.vnaskos.pdfguru.processing.document.GenericDocumentImporter;
+import com.vnaskos.pdfguru.exception.ExecutionException;
+import com.vnaskos.pdfguru.DocumentControlListener;
+import com.vnaskos.pdfguru.GenericDocumentImporter;
 import com.vnaskos.pdfguru.InputItem;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -25,12 +25,12 @@ class PdfboxImageImporter extends GenericDocumentImporter<PDDocument, PDPage> {
     }
 
     @Override
-    public void addInputItem(InputItem inputItem, float compression) throws ExcecutionException {
+    public void addInputItem(InputItem inputItem, float compression) throws ExecutionException {
         try {
             BufferedImage image = ImageIO.read(new File(inputItem.getFilePath()));
             drawImageOnNewBlankPage(image, compression);
         } catch (IOException ex) {
-            throw new ExcecutionException("[E03] - can't process image " + inputItem.getFilePath());
+            throw new ExecutionException("[E03] - can't process image " + inputItem.getFilePath());
         }
     }
 
