@@ -1,16 +1,17 @@
 package com.vnaskos.pdfguru.pdfbox;
 
-import com.vnaskos.pdfguru.exception.ExecutionException;
 import com.vnaskos.pdfguru.DocumentControlListener;
 import com.vnaskos.pdfguru.GenericDocumentImporter;
 import com.vnaskos.pdfguru.InputItem;
+import com.vnaskos.pdfguru.exception.ExecutionException;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBufferedFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageTree;
 import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -33,7 +34,7 @@ class PdfboxPdfImporter extends GenericDocumentImporter<PDDocument, PDPage> {
     }
 
     private PDDocument readDocument(String filePath) throws IOException {
-        PDDocument sourcePdf = PDDocument.load(new File(filePath));
+        PDDocument sourcePdf = Loader.loadPDF(new RandomAccessReadBufferedFile(filePath));
         documentControlListener.preventFromGC(sourcePdf);
         return sourcePdf;
     }
